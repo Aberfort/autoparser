@@ -1,0 +1,12 @@
+{
+  "new_version": "0.1.10",
+  "package": "https://stage.t42it.info/wp-content/plugins/sc-autoparser.zip",
+  "tested": "6.3",
+  "requires": "5.0",
+  "downloaded": 123,
+  "last_updated": "2025-06-05",
+  "sections": {
+    "description": "Description of the update.",
+    "changelog": "Changelog of the update."
+  }
+}

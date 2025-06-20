@@ -1,0 +1,520 @@
+/* ==================================================================
+ *  SC Autoparser – Ultra Glass UI v2.3
+ * ==================================================================*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---------- TOKENS ---------- */
+:root {
+  --scap-primary: #6c7bff;
+  --scap-primary-end: #8e5bff;
+  --scap-danger: #ff6464;
+  --scap-success: #34d399;
+  --scap-bg-card: hsla(0 0% 100%/.8);
+  --scap-bg-muted: #f3f4f7;
+  --scap-bg-page: #e5e7eb;
+  --scap-border: #d1d5db;
+  --scap-radius: 1rem;
+  --scap-glass-blur: 14px;
+  --scap-shadow-sm: 0 2px 6px rgba(0, 0, 0, .06);
+  --scap-shadow-md: 0 8px 24px rgba(0, 0, 0, .1);
+  --scap-speed: .25s;
+}
+
+@media(prefers-color-scheme: dark) {
+  :root {
+    --scap-primary: #8d9eff;
+    --scap-primary-end: #b08aff;
+    --scap-bg-card: hsla(217 32% 17%/.55);
+    --scap-bg-muted: #1e293b;
+    --scap-bg-page: #111827;
+    --scap-border: #334155;
+    --scap-shadow-md: 0 10px 28px rgba(0, 0, 0, .65);
+  }
+}
+
+/* ---------- BASE BG ---------- */
+body.scap-admin {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(120deg, var(--scap-bg-page) 0%, var(--scap-bg-muted) 100%),
+  url("data:image/svg+xml,%3Csvg width='160' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+  background-size: cover, 200px 200px;
+  color: #1f2937;
+}
+
+@media(prefers-color-scheme: dark) {
+  body.scap-admin {
+    color: #e2e8f0;
+  }
+}
+
+/* ---------- keyframes (fixed) ---------- */
+@keyframes float-y {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* =================================================================
+ *  CARD
+ * =================================================================*/
+.scap-card {
+  position: relative;
+  border-radius: var(--scap-radius);
+  background: var(--scap-bg-card);
+  border: 1px solid var(--scap-border);
+  box-shadow: var(--scap-shadow-md);
+}
+
+.scap-card__head {
+  @apply flex items-center justify-between;
+  padding: 1.75rem 2.25rem;
+  color: #fff;
+  background: linear-gradient(145deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+}
+
+/* =================================================================
+ *  BUTTONS (soft gradient, head-contrast shadow)
+ * =================================================================*/
+.scap-btn {
+  --bg1: var(--scap-primary);
+  --bg2: var(--scap-primary-end);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-weight: 600;
+  padding: .68rem 1.4rem;
+  border-radius: .8rem;
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
+  transition: transform .18s, box-shadow .18s;
+}
+
+.scap-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .14);
+}
+
+.scap-btn:active {
+  transform: none;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, .16);
+}
+
+.scap-card__head .scap-btn {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+}
+
+/* << */
+.scap-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(108, 123, 255, .45);
+}
+
+.scap-btn--secondary {
+  --bg1: #fff0;
+  --bg2: #fff0;
+  color: var(--scap-primary);
+  border: 1px solid var(--scap-primary);
+  background: #0000;
+}
+
+.scap-btn--secondary:hover {
+  background: linear-gradient(135deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+  color: #fff;
+}
+
+.scap-btn--danger {
+  --bg1: var(--scap-danger);
+  --bg2: #ff8989;
+}
+
+.scap-btn--icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: .55rem;
+}
+
+/* =================================================================
+ *  GLASS INPUT MIXIN
+ * =================================================================*/
+@mixin glass-input {
+  width: 100%;
+  font-size: .95rem;
+  padding: .7rem 1rem;
+  border-radius: .65rem;
+  border: 1px solid var(--scap-border);
+  background: hsla(0 0% 100%/.7);
+  backdrop-filter: blur(8px);
+  transition: border var(--scap-speed), box-shadow var(--scap-speed), transform var(--scap-speed);
+  &::placeholder {
+    color: #9ca3af;
+    font-weight: 500;
+  }
+  &:focus {
+    border-color: var(--scap-primary);
+    box-shadow: 0 0 0 3px rgba(108, 123, 255, .35);
+    outline: none;
+  }
+}
+
+@media(prefers-color-scheme: dark) {
+  @mixin glass-input {
+    background: hsla(217 32% 17%/.5);
+  }
+}
+
+/* explicit */
+.scap-input {
+  @include glass-input;
+}
+
+.scap-textarea {
+  @include glass-input;
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.scap-select {
+  @include glass-input;
+  padding-right: 2.8rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23888'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-size: 10px 6px;
+  background-position: right .9rem center;
+}
+
+@media(prefers-color-scheme: dark) {
+  .scap-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+  }
+}
+
+/* =================================================================
+ *  SELECT[multiple]  (категорії)
+ * =================================================================*/
+select[multiple].scap-select {
+  min-height: 10rem !important;
+  overflow: auto !important;
+  cursor: default !important;
+}
+
+select[multiple].scap-select option {
+  padding: .35rem .8rem;
+}
+
+select[multiple].scap-select option:checked {
+  background: var(--scap-primary);
+  color: #fff;
+}
+
+/* =================================================================
+ *  TOGGLE, BADGES, TABLE, HEADINGS  (без змін з v2.2)
+ * =================================================================*/
+.scap-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+}
+
+.scap-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.scap-toggle span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background .25s;
+}
+
+.scap-toggle span::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  transition: transform .25s;
+}
+
+.scap-toggle input:checked + span {
+  background: var(--scap-primary);
+}
+
+.scap-toggle input:checked + span::after {
+  transform: translateX(22px);
+}
+
+.status-badge {
+  display: inline-flex;
+  gap: .25rem;
+  padding: .28rem .72rem;
+  border-radius: 999px;
+  font-size: .73rem;
+  font-weight: 700;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+  animation: float-y 4s ease infinite;
+}
+
+.status-badge--ok {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+}
+
+.status-badge--error {
+  background: linear-gradient(135deg, #ff8a8a 0%, #ff6464 100%);
+}
+
+.status-badge--run {
+  background: linear-gradient(135deg, #9ba9ff 0%, #6c7bff 100%);
+  animation-duration: 2s;
+}
+
+.status-badge--pending {
+  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+}
+
+.scap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+.scap-table thead th {
+  top: 60px;
+  z-index: 20;
+  padding: .95rem 1rem;
+  background: var(--scap-bg-card);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--scap-border);
+  font-weight: 700;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  text-align: left;
+}
+
+.scap-table tbody tr {
+  transition: background .18s, transform .18s;
+}
+
+.scap-table tbody tr:nth-child(odd) {
+  background: rgba(0, 0, 0, .02);
+}
+
+.scap-table tbody tr:hover {
+  background: hsla(232 50% 94%/.6);
+  transform: scale(1.005);
+}
+
+@media(prefers-color-scheme: dark) {
+  .scap-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, .02);
+  }
+  .scap-table tbody tr:hover {
+    background: hsla(217 32% 20%/.6);
+  }
+}
+
+.scap-table td {
+  padding: .85rem 1rem;
+}
+
+.scap-table--log {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 600px;
+}
+
+.scap-table--log td:first-child {
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+h2.text-3xl, h2.text-2xl, .scap-card__head h2 {
+  position: relative;
+}
+
+h2.text-3xl::after, h2.text-2xl::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 60px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+  background-size: 200% 100%;
+  animation: shine 3s linear infinite;
+}
+
+/* =================================================================
+ *  FORM GRID & LABELS
+ * =================================================================*/
+.scap-form {
+  display: flex;
+  gap: 2.5rem 3.5rem;
+}
+
+.scap-fieldset {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.7rem;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scap-fieldset > legend {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: .4rem;
+  color: var(--scap-primary);
+}
+
+.scap-label {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+/* =================================================================
+ *  CORE-OVERRIDES
+ * =================================================================*/
+.scap-admin {
+
+  .scap-form .scap-input,
+  .scap-form .scap-select,
+  .scap-form .scap-textarea {
+    width: 100% !important;
+    max-width: -webkit-fill-available;
+  }
+
+  input.scap-input,
+  input.components-text-control__input.scap-input,
+  input.components-number-control__input.scap-input,
+  .wp-core-ui input.scap-input {
+    @include glass-input;
+  }
+
+  textarea.scap-textarea,
+  textarea.components-textarea-control__input.scap-textarea,
+  .wp-core-ui textarea.scap-textarea {
+    all: unset;
+    @include glass-input;
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  select.scap-select,
+  select.components-select-control__input.scap-select,
+  .wp-core-ui select.scap-select {
+    all: unset;
+    @include glass-input;
+    padding-right: 2.8rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23888'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-size: 10px 6px;
+    background-position: right .9rem center;
+  }
+
+  @media(prefers-color-scheme: dark) {
+    select.scap-select,
+    select.components-select-control__input.scap-select,
+    .wp-core-ui select.scap-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+    }
+  }
+
+  .components-base-control__field .components-toggle-control__label {
+    font-weight: 600;
+    color: inherit;
+  }
+}
+
+/* =================================================================
+ *  Extra styles for LogTable badges & long messages
+ * =================================================================*/
+.log-badge {
+  @apply inline-flex items-center justify-center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+
+.log-badge--info {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.log-badge--error {
+  background: linear-gradient(135deg, #ff8a8a 0%, #ff6464 100%);
+}
+
+/* prevent long log JSON from stretching row height */
+.scap-table--log td {
+  vertical-align: top;
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+  line-height: 1.35;
+}
+
+/* optional: thin custom scrollbar inside log card */
+.scap-card::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scap-card::-webkit-scrollbar-thumb {
+  background: var(--scap-primary-end);
+  border-radius: 4px;
+}
+
+
+/* =================================================================
+ *  AUTOFILL fix
+ * =================================================================*/
+input.scap-input:-webkit-autofill {
+  box-shadow: 0 0 0 1000px hsla(0, 0%, 100%, .7) inset !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+@media(prefers-color-scheme: dark) {
+  input.scap-input:-webkit-autofill {
+    box-shadow: 0 0 0 1000px hsla(217 32% 17%/.55) inset !important;
+  }
+}
