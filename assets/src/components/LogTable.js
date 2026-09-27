@@ -70,6 +70,8 @@ export default function LogTable() {
                 <table className="autoparser-table autoparser-table--log">
                     <thead>
                     <tr>
+                        <th>{__('Час', 'autoparser')}</th>
+                        <th>{__('Рівень', 'autoparser')}</th>
                         <th>{__('Повідомлення', 'autoparser')}</th>
                     </tr>
                     </thead>
@@ -86,11 +88,17 @@ export default function LogTable() {
                                 transition={{duration: .15}}
                             >
                                 <td className="font-mono whitespace-nowrap">{time}</td>
+                                <td>
+                                    <span className={`log-badge log-badge--${(lvl || '').toLowerCase()}`}>
+                                        {lvl}
+                                    </span>
+                                </td>
+                                <td>{msg}</td>
                             </motion.tr>
                         ))}
                         {/* scroll target */}
                         <tr ref={endRef}>
-                            <td/>
+                            <td colSpan={3}/>
                         </tr>
                         </tbody>
                     </AnimatePresence>

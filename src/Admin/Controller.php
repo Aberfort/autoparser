@@ -104,21 +104,6 @@ class Controller {
 			$asset['version'],
 			true
 		);
-
-		wp_localize_script(
-			'autoparser-admin',
-			'autoparserAjax',
-			array(
-				'url'   => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
-			)
-		);
-
-		wp_localize_script(
-			'autoparser-admin',
-			'autoparserSettings',
-			get_option( 'autoparser_settings', array() )
-		);
 	}
 
 	/* ---------- RENDERS ---------- */

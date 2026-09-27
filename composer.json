@@ -22,8 +22,8 @@
     }
   },
   "scripts": {
-    "lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor ./src",
-    "lint-fix": "phpcbf --standard=WordPress --extensions=php --ignore=vendor ./src",
+    "lint": "phpcs",
+    "lint-fix": "phpcbf",
     "test": "vendor/bin/phpunit",
     "build": "wp-scripts build",
     "start": "wp-scripts start"

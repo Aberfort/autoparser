@@ -33,6 +33,7 @@ class FeedController extends WP_REST_Controller {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'permissions' ),
+					'args'                => $this->item_args(),
 				),
 			)
 		);
@@ -49,6 +50,7 @@ class FeedController extends WP_REST_Controller {
 					'methods'             => array( 'PUT', 'PATCH' ),
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'permissions' ),
+					'args'                => $this->item_args(),
 				),
 				array(
 					'methods'             => 'DELETE',
@@ -115,6 +117,98 @@ class FeedController extends WP_REST_Controller {
 
 	public function permissions(): bool {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * REST args schema shared by create/update routes — every writable
+	 * field is sanitized before it ever reaches from_request().
+	 */
+	private function item_args(): array {
+		return array(
+			'name'             => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'url'              => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+			),
+			'active'           => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			),
+			'status'           => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'selector'         => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'selector_end'     => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'limit'            => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'post_type'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'author_id'        => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'categories'       => array(
+				'type'              => 'array',
+				'items'             => array( 'type' => 'integer' ),
+				'sanitize_callback' => static function ( $value ) {
+					return array_map( 'absint', (array) $value );
+				},
+			),
+			'prompt'           => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'detail_prompt'    => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'thumbnail_mode'   => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'thumbnail_id'     => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'post_time'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'meta_title'       => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'meta_description' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'image_dir'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'predict_only'     => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			),
+			'ai_provider'      => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+		);
 	}
 
 	private function from_request( WP_REST_Request $req, ?Feed $feed = null ): Feed {

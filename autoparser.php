@@ -1,14 +1,18 @@
 <?php
 /**
- * Plugin Name:  Autoparser
- * Plugin URI:   https://example.com/plugins/autoparser
- * Description:  Automatic parser → Gemini AI rewrite → Gutenberg autoposting.
- * Version:      0.1.10
- * Author:       Serhii Vasyliev
- * License:      GPL-2.0-or-later
- * Text Domain:  autoparser
+ * Plugin Name:       Autoparser
+ * Plugin URI:        https://example.com/plugins/autoparser
+ * Description:       Automatic parser → Gemini AI rewrite → Gutenberg autoposting.
+ * Version:           0.1.10
+ * Requires at least: 6.5
+ * Requires PHP:      8.2
+ * Author:            Serhii Vasyliev
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       autoparser
+ *
+ * @package AutoParser
  */
-
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

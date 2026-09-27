@@ -61,18 +61,6 @@ final class Plugin {
 				'deactivate',
 			)
 		);
-
-		/* AJAX: Save settings */
-		add_action(
-			'wp_ajax_autoparser_save_settings',
-			function () {
-				check_ajax_referer( 'wp_rest' );
-				$opts                   = get_option( 'autoparser_settings', array() );
-				$opts['gemini_api_key'] = sanitize_text_field( $_POST['gemini_api_key'] ?? '' );
-				update_option( 'autoparser_settings', $opts );
-				wp_send_json_success();
-			}
-		);
 	}
 
 	/**

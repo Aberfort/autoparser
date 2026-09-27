@@ -47,10 +47,11 @@ class SettingsController extends WP_REST_Controller {
 			get_option(
 				'autoparser_settings',
 				[
-					'gemini_api_key' => '',
-					'openai_api_key' => '',
-					'global_prompt'  => '',
-					'openai_model'   => '',
+					'gemini_api_key'        => '',
+					'openai_api_key'        => '',
+					'global_prompt'         => '',
+					'openai_model'          => '',
+					'enable_fallback_proxy' => false,
 				]
 			)
 		);
@@ -81,6 +82,11 @@ class SettingsController extends WP_REST_Controller {
 		// глобальний промпт
 		if ( $r->has_param( 'global_prompt' ) ) {
 			$opts['global_prompt'] = sanitize_textarea_field( $r['global_prompt'] );
+		}
+
+		// резервний проксі r.jina.ai при 403/503 від джерела — вимкнено за замовчуванням
+		if ( $r->has_param( 'enable_fallback_proxy' ) ) {
+			$opts['enable_fallback_proxy'] = (bool) $r['enable_fallback_proxy'];
 		}
 
 		update_option( 'autoparser_settings', $opts );

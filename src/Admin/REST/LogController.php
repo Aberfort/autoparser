@@ -35,7 +35,7 @@ class LogController extends WP_REST_Controller {
 	/** @inheritDoc */
 	public function get_items( $request ) {
 		/* параметри */
-		$date  = sanitize_file_name( $request->get_param( 'date' ) ?? date( 'Y-m-d' ) );
+		$date  = sanitize_file_name( $request->get_param( 'date' ) ?? gmdate( 'Y-m-d' ) );
 		$limit = (int) ( $request->get_param( 'limit' ) ?? 500 );
 
 		$file = "{$this->logDir}/autoparser-{$date}.log";

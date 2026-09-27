@@ -2,6 +2,7 @@ import {useState, useEffect} from '@wordpress/element';
 import {
     TextControl,
     TextareaControl,
+    ToggleControl,
     Button,
     Spinner,
     Notice,
@@ -20,6 +21,7 @@ export default function Settings() {
     const [prompt, setPrompt] = useState('');
 
     const [fixturesKey, setFixturesKey] = useState('');
+    const [enableFallbackProxy, setEnableFallbackProxy] = useState(false);
 
     const [notice, setNotice] = useState(null);
 
@@ -32,6 +34,7 @@ export default function Settings() {
                 setOpenaiModel(d.openai_model || '');
                 setPrompt(d.global_prompt || '');
                 setFixturesKey(d.fixtures_api_key || '');
+                setEnableFallbackProxy(!!d.enable_fallback_proxy);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -47,7 +50,8 @@ export default function Settings() {
                 openai_api_key: apiKeyOpenAI,
                 openai_model: openaiModel,
                 global_prompt: prompt,
-                fixtures_api_key: fixturesKey
+                fixtures_api_key: fixturesKey,
+                enable_fallback_proxy: enableFallbackProxy,
             },
         })
             .then(() => setNotice({
@@ -121,6 +125,13 @@ export default function Settings() {
                             className="autoparser-textarea"
                         />
                     </label>
+
+                    <ToggleControl
+                        label={__('Резервний проксі (r.jina.ai) при 403/503 від джерела', 'autoparser')}
+                        help={__('Якщо джерело блокує прямі запити, URL джерела буде передано стороньому сервісу r.jina.ai для отримання вмісту. Вимкнено за замовчуванням.', 'autoparser')}
+                        checked={enableFallbackProxy}
+                        onChange={setEnableFallbackProxy}
+                    />
 
                     {notice &&
                         <Notice status={notice.status} isDismissible onRemove={() => setNotice(null)}>

@@ -639,8 +639,11 @@ PROMPT;
             return (string)$res->getBody();
         }
 
-        if (in_array($code, [403, 503], true)) {
-            $proxyUrl = 'https://r.jina.ai/http:' . ltrim($url, 'https://');
+        $settings = get_option('autoparser_settings', []);
+
+        /* Third-party fallback proxy — opt-in only, see Settings > "Резервний проксі". */
+        if (in_array($code, [403, 503], true) && !empty($settings['enable_fallback_proxy'])) {
+            $proxyUrl = 'https://r.jina.ai/' . $url;
             $proxyRes = $this->http->get($proxyUrl, [
                 'timeout'     => 15,
                 'http_errors' => false,
