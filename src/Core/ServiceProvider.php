@@ -73,10 +73,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		/* ---------- Fixtures (RapidAPI) ---------- */
-		$c['fixtures'] = static function () use ( $c ): \AutoParser\Fixtures\FixturesService {
+		$c['fixtures'] = static function () use ( $c ): \AutoParser\Modules\Predictions\FixturesService {
 			$opts = get_option( 'autoparser_settings', array() );
 
-			return new \AutoParser\Fixtures\FixturesService(
+			return new \AutoParser\Modules\Predictions\FixturesService(
 				apiKey: $opts['fixtures_api_key'] ?? '',
 				http: $c['http'],
 				log: $c['logger'],

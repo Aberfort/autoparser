@@ -22,6 +22,7 @@ export default function Settings() {
 
     const [fixturesKey, setFixturesKey] = useState('');
     const [enableFallbackProxy, setEnableFallbackProxy] = useState(false);
+    const [predictionsEnabled, setPredictionsEnabled] = useState(false);
 
     const [notice, setNotice] = useState(null);
 
@@ -35,6 +36,7 @@ export default function Settings() {
                 setPrompt(d.global_prompt || '');
                 setFixturesKey(d.fixtures_api_key || '');
                 setEnableFallbackProxy(!!d.enable_fallback_proxy);
+                setPredictionsEnabled(!!d.predictions_enabled);
             })
             .finally(() => setLoading(false));
     }, []);
@@ -52,6 +54,7 @@ export default function Settings() {
                 global_prompt: prompt,
                 fixtures_api_key: fixturesKey,
                 enable_fallback_proxy: enableFallbackProxy,
+                predictions_enabled: predictionsEnabled,
             },
         })
             .then(() => setNotice({
@@ -131,6 +134,13 @@ export default function Settings() {
                         help={__('Якщо джерело блокує прямі запити, URL джерела буде передано стороньому сервісу r.jina.ai для отримання вмісту. Вимкнено за замовчуванням.', 'autoparser')}
                         checked={enableFallbackProxy}
                         onChange={setEnableFallbackProxy}
+                    />
+
+                    <ToggleControl
+                        label={__('Модуль AI-прогнозів (футбол)', 'autoparser')}
+                        help={__('Окрема, вузькоспеціалізована фіча для спортивних прогнозів (API-Football + ACF-шаблон ставок). Не потрібна для звичайного парсингу статей. Вимкнено за замовчуванням.', 'autoparser')}
+                        checked={predictionsEnabled}
+                        onChange={setPredictionsEnabled}
                     />
 
                     {notice &&

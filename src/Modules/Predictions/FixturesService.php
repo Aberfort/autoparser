@@ -5,7 +5,7 @@
  * Дає TOP-матчі «сьогодні» з урахуванням локальної TZ WordPress.
  */
 
-namespace AutoParser\Fixtures;
+namespace AutoParser\Modules\Predictions;
 
 use GuzzleHttp\Client;
 use AutoParser\Core\Logger;

@@ -52,6 +52,7 @@ class SettingsController extends WP_REST_Controller {
 					'global_prompt'         => '',
 					'openai_model'          => '',
 					'enable_fallback_proxy' => false,
+					'predictions_enabled'   => false,
 				)
 			)
 		);
@@ -87,6 +88,11 @@ class SettingsController extends WP_REST_Controller {
 		// резервний проксі r.jina.ai при 403/503 від джерела — вимкнено за замовчуванням
 		if ( $r->has_param( 'enable_fallback_proxy' ) ) {
 			$opts['enable_fallback_proxy'] = (bool) $r['enable_fallback_proxy'];
+		}
+
+		// опційний модуль AI-прогнозів (футбол) — вимкнено за замовчуванням
+		if ( $r->has_param( 'predictions_enabled' ) ) {
+			$opts['predictions_enabled'] = (bool) $r['predictions_enabled'];
 		}
 
 		update_option( 'autoparser_settings', $opts );

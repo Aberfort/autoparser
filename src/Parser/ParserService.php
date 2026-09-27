@@ -16,7 +16,7 @@ use AutoParser\Feed\Feed;
 use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
 use AutoParser\Publisher\GutenbergPublisher;
-use AutoParser\Fixtures\FixturesService;
+use AutoParser\Modules\Predictions\FixturesService;
 use AutoParser\AI\ProviderFactory;
 use AutoParser\AI\RewriteService as DynamicRewrite;
 use AutoParser\AI\PredictionService as DynamicPredict;
@@ -78,6 +78,20 @@ PROMPT;
 	/* ================= INTERNAL ================= */
 
 	private function run_feed( Feed $feed ): void {
+		if ( $this->requires_predictions_module( $feed ) && ! $this->predictions_module_enabled() ) {
+			$this->feeds->update_status(
+				$feed->id,
+				'error',
+				__( 'Модуль AI-прогнозів вимкнено в Налаштуваннях.', 'autoparser' )
+			);
+			$this->log->warning(
+				"⛔ {$feed->name}: predictions module is disabled, skipping run",
+				array( 'feed_id' => $feed->id )
+			);
+
+			return;
+		}
+
 		$provider  = ProviderFactory::make( $feed->ai_provider ?? 'gemini' );
 		$rewriter  = new DynamicRewrite( $provider );
 		$predictor = new DynamicPredict( $provider );
@@ -117,6 +131,21 @@ PROMPT;
 		 * @param array $result { 'posted' => int, 'status' => string }
 		 */
 		do_action( 'autoparser_after_run_feed', $feed, $result );
+	}
+
+	/**
+	 * TRUE if this feed's output depends on the (optional, off-by-default)
+	 * predictions/forecast module — either it's a pure AI-forecast feed
+	 * (no URL) or an RSS feed configured to publish as a forecast.
+	 */
+	private function requires_predictions_module( Feed $feed ): bool {
+		return '' === $feed->url || $feed->predict_only;
+	}
+
+	private function predictions_module_enabled(): bool {
+		$settings = get_option( 'autoparser_settings', array() );
+
+		return ! empty( $settings['predictions_enabled'] );
 	}
 
 	/* ---------- AI-прогнози ---------- */
