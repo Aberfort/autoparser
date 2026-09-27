@@ -4,27 +4,27 @@
  *
  */
 
-namespace ScAutoParser\Core;
+namespace AutoParser\Core;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use GuzzleHttp\Client;
-use ScAutoParser\Feed\FeedRepository;
-use ScAutoParser\Feed\PostMapRepository;
-use ScAutoParser\Feed\PostType;
-use ScAutoParser\Admin\Controller as AdminController;
-use ScAutoParser\Admin\REST\FeedController as FeedRest;
-use ScAutoParser\Admin\REST\FeedRunController as FeedRunRest;
-use ScAutoParser\Admin\REST\LogController;
-use ScAutoParser\Admin\REST\ScheduleController;
-use ScAutoParser\Admin\REST\SettingsController;
-use ScAutoParser\AI\RewriteService;
-use ScAutoParser\AI\PredictionService;
-use ScAutoParser\Parser\ParserService;
-use ScAutoParser\Publisher\GutenbergPublisher;
-use ScAutoParser\Cron\Scheduler;
-use ScAutoParser\CLI\RunCommand;
-use ScAutoParser\AI\ProviderFactory;
+use AutoParser\Feed\FeedRepository;
+use AutoParser\Feed\PostMapRepository;
+use AutoParser\Feed\PostType;
+use AutoParser\Admin\Controller as AdminController;
+use AutoParser\Admin\REST\FeedController as FeedRest;
+use AutoParser\Admin\REST\FeedRunController as FeedRunRest;
+use AutoParser\Admin\REST\LogController;
+use AutoParser\Admin\REST\ScheduleController;
+use AutoParser\Admin\REST\SettingsController;
+use AutoParser\AI\RewriteService;
+use AutoParser\AI\PredictionService;
+use AutoParser\Parser\ParserService;
+use AutoParser\Publisher\GutenbergPublisher;
+use AutoParser\Cron\Scheduler;
+use AutoParser\CLI\RunCommand;
+use AutoParser\AI\ProviderFactory;
 
 class ServiceProvider implements ServiceProviderInterface {
 
@@ -32,10 +32,10 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── Logger ───────── */
 		$c['logger'] = static function (): Logger {
-			return new Logger( WP_CONTENT_DIR . '/uploads/sc-autoparser/logs' );
+			return new Logger( WP_CONTENT_DIR . '/uploads/autoparser/logs' );
 		};
 
-		$GLOBALS['scap_logger'] = $c['logger'];
+		$GLOBALS['autoparser_logger'] = $c['logger'];
 
 		/* ───────── HTTP Client ───────── */
 		$c['http'] = static fn() => new Client();
@@ -64,7 +64,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── AI Rewrite (provider-aware) ───────── */
 		$c['ai.rewrite'] = static function () use ( $c ): RewriteService {
-			$settings = get_option( 'scap_settings', [] );
+			$settings = get_option( 'autoparser_settings', [] );
 			$default  = $settings['default_ai'] ?? 'gemini';
 
 			$provider = ProviderFactory::make( $default );
@@ -73,10 +73,10 @@ class ServiceProvider implements ServiceProviderInterface {
 		};
 
 		/* ---------- Fixtures (RapidAPI) ---------- */
-		$c['fixtures'] = static function () use ( $c ): \ScAutoParser\Fixtures\FixturesService {
-			$opts = get_option( 'scap_settings', [] );
+		$c['fixtures'] = static function () use ( $c ): \AutoParser\Fixtures\FixturesService {
+			$opts = get_option( 'autoparser_settings', [] );
 
-			return new \ScAutoParser\Fixtures\FixturesService(
+			return new \AutoParser\Fixtures\FixturesService(
 				apiKey: $opts['fixtures_api_key'] ?? '',
 				http: $c['http'],
 				log: $c['logger'],
@@ -85,7 +85,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── AI Prediction (provider-aware) ───────── */
 		$c['ai.prediction'] = static function () use ( $c ): PredictionService {
-			$settings = get_option( 'scap_settings', [] );
+			$settings = get_option( 'autoparser_settings', [] );
 			$default  = $settings['default_ai'] ?? 'gemini';
 
 			$provider = ProviderFactory::make( $default );
@@ -125,16 +125,16 @@ class ServiceProvider implements ServiceProviderInterface {
 		/* ───────── CLI command ───────── */
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command(
-				'sc-parser run',
+				'autoparser run',
 				new RunCommand( $c['parser.service'] )
 			);
 		}
 
 		/* ───────── Admin pages ───────── */
-		$c['admin.controller'] = static fn() => new AdminController( SC_AUTOPARSER_VERSION );
+		$c['admin.controller'] = static fn() => new AdminController( AUTOPARSER_VERSION );
 
 		/* ───────── REST: Logs & Settings ───────── */
-		$c['log.rest']      = static fn() => new LogController( WP_CONTENT_DIR . '/uploads/sc-autoparser/logs' );
+		$c['log.rest']      = static fn() => new LogController( WP_CONTENT_DIR . '/uploads/autoparser/logs' );
 		$c['settings.rest'] = static fn() => new SettingsController();
 	}
 }

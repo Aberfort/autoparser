@@ -1,10 +1,10 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
 use wpdb;
 use WP_Post;
-use ScAutoParser\Util\UrlCanonicalizer;
+use AutoParser\Util\UrlCanonicalizer;
 
 /**
  * Map: (feed_id, source_url) → post_id, duplicate guard.
@@ -16,7 +16,7 @@ class PostMapRepository
 
     public function __construct(private wpdb $db)
     {
-        $this->table = $this->db->prefix . 'scap_posts_map';
+        $this->table = $this->db->prefix . 'autoparser_posts_map';
         $this->maybe_create_table();
     }
 

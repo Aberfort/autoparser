@@ -1,9 +1,9 @@
 /**
- * Lightweight wrapper over wp.data and apiFetch for SC Autoparser.
+ * Lightweight wrapper over wp.data and apiFetch for Autoparser.
  */
 import apiFetch from '@wordpress/api-fetch';
 
-const NAMESPACE = '/sc-autoparser/v1/feeds';
+const NAMESPACE = '/autoparser/v1/feeds';
 
 export const fetchFeeds = () => apiFetch({path: NAMESPACE});
 

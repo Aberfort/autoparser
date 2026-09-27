@@ -1,8 +1,8 @@
 <?php
 
-namespace ScAutoParser\Publisher;
+namespace AutoParser\Publisher;
 
-use ScAutoParser\Feed\Feed;
+use AutoParser\Feed\Feed;
 
 /**
  * Публікація дописів (Gutenberg-блоки) + Yoast SEO-мета.
@@ -140,7 +140,7 @@ class GutenbergPublisher
                                 [
                                     'label' => __(
                                         'Зробити ставку',
-                                        'sc-autoparser'
+                                        'autoparser'
                                     ),
                                     'url'   => '[get-url-api url=reg_url]',
                                     'style' => 'gradient',

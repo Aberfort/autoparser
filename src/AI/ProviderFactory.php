@@ -1,8 +1,8 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
-use ScAutoParser\AI\Contract\ProviderInterface;
+use AutoParser\AI\Contract\ProviderInterface;
 
 class ProviderFactory {
 
@@ -11,9 +11,9 @@ class ProviderFactory {
 	 */
 	public static function make( string $code ): ProviderInterface {
 
-		$opt = get_option( 'scap_settings', [] );
+		$opt = get_option( 'autoparser_settings', [] );
 
-		$logger = $GLOBALS['scap_logger'];
+		$logger = $GLOBALS['autoparser_logger'];
 
 		return match ( $code ) {
 

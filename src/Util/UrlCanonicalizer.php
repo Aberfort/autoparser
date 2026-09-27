@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Util;
+namespace AutoParser\Util;
 
 class UrlCanonicalizer
 {

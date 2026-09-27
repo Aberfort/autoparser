@@ -1,9 +1,9 @@
 <?php
 
-namespace ScAutoParser\Core;
+namespace AutoParser\Core;
 
 use Pimple\Container;
-use ScAutoParser\Feed\Feed;
+use AutoParser\Feed\Feed;
 
 final class Plugin {
 
@@ -53,9 +53,9 @@ final class Plugin {
 		$this->c['cron.scheduler']->register_hook();
 
 		/* Activation & Deactivation */
-		register_activation_hook( SC_AUTOPARSER_FILE, array( $this, 'activate' ) );
+		register_activation_hook( AUTOPARSER_FILE, array( $this, 'activate' ) );
 		register_deactivation_hook(
-			SC_AUTOPARSER_FILE,
+			AUTOPARSER_FILE,
 			array(
 				$this,
 				'deactivate',
@@ -64,12 +64,12 @@ final class Plugin {
 
 		/* AJAX: Save settings */
 		add_action(
-			'wp_ajax_scap_save_settings',
+			'wp_ajax_autoparser_save_settings',
 			function () {
 				check_ajax_referer( 'wp_rest' );
-				$opts                   = get_option( 'scap_settings', array() );
+				$opts                   = get_option( 'autoparser_settings', array() );
 				$opts['gemini_api_key'] = sanitize_text_field( $_POST['gemini_api_key'] ?? '' );
-				update_option( 'scap_settings', $opts );
+				update_option( 'autoparser_settings', $opts );
 				wp_send_json_success();
 			}
 		);
@@ -93,22 +93,22 @@ final class Plugin {
 	 */
 	public function deactivate(): void {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'sc_autoparser_run_feed', array(), 'sc-autoparser' );
+			as_unschedule_all_actions( 'autoparser_run_feed', array(), 'autoparser' );
 		}
 	}
 
 	/** Load plugin textdomain */
 	public function i18n(): void {
 		load_plugin_textdomain(
-			'sc-autoparser',
+			'autoparser',
 			false,
-			dirname( plugin_basename( SC_AUTOPARSER_FILE ) ) . '/languages'
+			dirname( plugin_basename( AUTOPARSER_FILE ) ) . '/languages'
 		);
 	}
 
 	/** Ensure upload directories exist */
 	public function maybe_create_upload_dir(): void {
-		$base = WP_CONTENT_DIR . '/uploads/sc-autoparser';
+		$base = WP_CONTENT_DIR . '/uploads/autoparser';
 		$log  = "$base/logs";
 		if ( ! is_dir( $base ) ) {
 			wp_mkdir_p( $base );

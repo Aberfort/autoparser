@@ -1,11 +1,11 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
-use ScAutoParser\Parser\ParserService;
+use AutoParser\Parser\ParserService;
 
 /**
  * REST-контролер для /cron
@@ -15,7 +15,7 @@ class ScheduleController extends WP_REST_Controller {
 	public function __construct(
 		private ParserService $parser
 	) {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'cron';
 	}
 
@@ -65,7 +65,7 @@ class ScheduleController extends WP_REST_Controller {
 		$store = \ActionScheduler::store();
 		$ids   = $store->query_actions(
 			array(
-				'group'    => 'sc-autoparser',
+				'group'    => 'autoparser',
 				'status'   => array( 'pending', 'in-progress' ),
 				'orderby'  => 'scheduled_date',
 				'order'    => 'ASC',

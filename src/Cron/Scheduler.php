@@ -1,9 +1,9 @@
 <?php
 
-namespace ScAutoParser\Cron;
+namespace AutoParser\Cron;
 
-use ScAutoParser\Feed\Feed;
-use ScAutoParser\Parser\ParserService;
+use AutoParser\Feed\Feed;
+use AutoParser\Parser\ParserService;
 
 class Scheduler {
 
@@ -14,7 +14,7 @@ class Scheduler {
 
 	public function register_hook(): void {
 		add_action(
-			'sc_autoparser_run_feed',
+			'autoparser_run_feed',
 			[ $this, 'handle' ],
 			10,
 			1
@@ -25,9 +25,9 @@ class Scheduler {
 
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions(
-				'sc_autoparser_run_feed',
+				'autoparser_run_feed',
 				[ $feed->id ],
-				'sc-autoparser'
+				'autoparser'
 			);
 		}
 
@@ -48,9 +48,9 @@ class Scheduler {
 			as_schedule_recurring_action(
 				$firstRun,
 				$interval,
-				'sc_autoparser_run_feed',
+				'autoparser_run_feed',
 				[ $feed->id ],
-				'sc-autoparser'
+				'autoparser'
 			);
 		}
 	}

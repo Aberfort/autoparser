@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Build a distributable sc-autoparser.zip for WordPress.org / manual install.
+# Build a distributable autoparser.zip for WordPress.org / manual install.
 # Usage: ./build.sh
 #
 set -euo pipefail
 
-PLUGIN_SLUG="sc-autoparser"
+PLUGIN_SLUG="autoparser"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="$(mktemp -d)"
 STAGE_DIR="${BUILD_DIR}/${PLUGIN_SLUG}"

@@ -1,11 +1,11 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
 use GeminiAPI\Client;
 use GeminiAPI\Resources\Parts\TextPart;
-use ScAutoParser\AI\Contract\ProviderInterface;
-use ScAutoParser\Core\Logger;
+use AutoParser\AI\Contract\ProviderInterface;
+use AutoParser\Core\Logger;
 use RuntimeException;
 
 class GeminiProvider implements ProviderInterface {

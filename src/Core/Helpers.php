@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Core;
+namespace AutoParser\Core;
 
 /**
  * Misc helper methods (static).

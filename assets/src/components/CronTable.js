@@ -14,7 +14,7 @@ import {__} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {motion, AnimatePresence} from 'framer-motion';
 
-const ENDPOINT = '/sc-autoparser/v1/cron';
+const ENDPOINT = '/autoparser/v1/cron';
 
 export default function CronTable() {
     /* state */
@@ -37,12 +37,12 @@ export default function CronTable() {
         apiFetch({path: `${ENDPOINT}/${id}/${type}`, method: 'POST'})
             .then(() => setNotice({
                 status: 'success',
-                text: type === 'run' ? __('Запуск розпочато', 'sc-autoparser')
-                    : __('Дію скасовано', 'sc-autoparser'),
+                text: type === 'run' ? __('Запуск розпочато', 'autoparser')
+                    : __('Дію скасовано', 'autoparser'),
             }))
             .catch(() => setNotice({
                 status: 'error',
-                text: __('Помилка', 'sc-autoparser')
+                text: __('Помилка', 'autoparser')
             }))
             .finally(() => {
                 setBusyId(null);
@@ -66,18 +66,18 @@ export default function CronTable() {
 
     return (
         <div className="space-y-10">
-            <h2 className="text-3xl font-bold">{__('Розклад запусків', 'sc-autoparser')}</h2>
+            <h2 className="text-3xl font-bold">{__('Розклад запусків', 'autoparser')}</h2>
 
             {/* filters */}
             <div className="flex flex-wrap gap-4 items-start">
                 <TextControl
-                    placeholder={__('Фільтр за Feed або статусом…', 'sc-autoparser')}
+                    placeholder={__('Фільтр за Feed або статусом…', 'autoparser')}
                     value={filter}
                     onChange={setFilter}
-                    className="w-full sm:w-1/3 scap-input"
+                    className="w-full sm:w-1/3 autoparser-input"
                 />
-                <Button className="scap-btn scap-btn--secondary" onClick={refresh}>
-                    {__('Оновити', 'sc-autoparser')}
+                <Button className="autoparser-btn autoparser-btn--secondary" onClick={refresh}>
+                    {__('Оновити', 'autoparser')}
                 </Button>
             </div>
 
@@ -88,8 +88,8 @@ export default function CronTable() {
             )}
 
             {/* table */}
-            <div className="scap-card p-0 overflow-auto">
-                <table className="scap-table">
+            <div className="autoparser-card p-0 overflow-auto">
+                <table className="autoparser-table">
                     <thead>
                     <tr>{['ID дії', 'Feed', 'Статус', 'Заплановано', 'Спроб', 'Дії'].map(h =>
                         <th key={h}>{h}</th>)}</tr>
@@ -99,7 +99,7 @@ export default function CronTable() {
                         {visible.length === 0 && (
                             <tr>
                                 <td colSpan={6} className="py-10 text-center text-gray-500">
-                                    {__('Немає запланованих дій', 'sc-autoparser')}
+                                    {__('Немає запланованих дій', 'autoparser')}
                                 </td>
                             </tr>
                         )}
@@ -117,21 +117,21 @@ export default function CronTable() {
                                 <td>{r.feed_id ?? '—'}</td>
                                 <td><span className={badge(r.status)}>
                                         {r.status === 'in-progress'
-                                            ? __('Запускається', 'sc-autoparser')
+                                            ? __('Запускається', 'autoparser')
                                             : r.status === 'pending'
-                                                ? __('Заплановано', 'sc-autoparser')
+                                                ? __('Заплановано', 'autoparser')
                                                 : r.status === 'complete'
                                                     ? 'OK'
-                                                    : __('Помилка', 'sc-autoparser')}
+                                                    : __('Помилка', 'autoparser')}
                                     </span></td>
                                 <td>{r.scheduled}</td>
                                 <td>{r.attempts}</td>
                                 <td className="flex gap-2">
                                     {/* RUN button — Dashicon controls-play */}
-                                    <Tooltip text={__('Запустити', 'sc-autoparser')}>
+                                    <Tooltip text={__('Запустити', 'autoparser')}>
                                         <Button
                                             icon="controls-play"                 /* ← контрастна іконка */
-                                            className="scap-btn scap-btn--icon scap-btn--secondary"
+                                            className="autoparser-btn autoparser-btn--icon autoparser-btn--secondary"
                                             size="small"
                                             disabled={busyId === r.id}
                                             onClick={() => doAction(r.id, 'run')}
@@ -139,10 +139,10 @@ export default function CronTable() {
                                     </Tooltip>
 
                                     {/* CANCEL button */}
-                                    <Tooltip text={__('Скасувати', 'sc-autoparser')}>
+                                    <Tooltip text={__('Скасувати', 'autoparser')}>
                                         <Button
                                             icon={closeSmall}
-                                            className="scap-btn scap-btn--icon scap-btn--danger"
+                                            className="autoparser-btn autoparser-btn--icon autoparser-btn--danger"
                                             size="small"
                                             isDestructive
                                             disabled={busyId === r.id}

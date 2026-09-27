@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
 use WP_REST_Request;
@@ -12,7 +12,7 @@ use WP_Error;
 class SettingsController extends WP_REST_Controller {
 
 	public function __construct() {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'settings';
 	}
 
@@ -45,7 +45,7 @@ class SettingsController extends WP_REST_Controller {
 	public function get(): \WP_HTTP_Response {
 		return rest_ensure_response(
 			get_option(
-				'scap_settings',
+				'autoparser_settings',
 				[
 					'gemini_api_key' => '',
 					'openai_api_key' => '',
@@ -59,7 +59,7 @@ class SettingsController extends WP_REST_Controller {
 	/* ====== SAVE (POST|PUT|PATCH) ====== */
 	public function save( WP_REST_Request $r ): \WP_HTTP_Response {
 
-		$opts = get_option( 'scap_settings', [] );
+		$opts = get_option( 'autoparser_settings', [] );
 
 		$opts['fixtures_api_key'] = sanitize_text_field( $r->get_param( 'fixtures_api_key' ) ?? '' );
 
@@ -83,7 +83,7 @@ class SettingsController extends WP_REST_Controller {
 			$opts['global_prompt'] = sanitize_textarea_field( $r['global_prompt'] );
 		}
 
-		update_option( 'scap_settings', $opts );
+		update_option( 'autoparser_settings', $opts );
 
 		return rest_ensure_response( $opts );
 	}

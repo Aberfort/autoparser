@@ -29,7 +29,7 @@ export default function LogTable() {
     /* fetch logs */
     const fetchLogs = () => {
         setLoading(true);
-        apiFetch({path: `/sc-autoparser/v1/logs?date=${date}&limit=500`})
+        apiFetch({path: `/autoparser/v1/logs?date=${date}&limit=500`})
             .then(arr => setLogs(
                 arr.filter(([, lvl]) => level === 'all' || lvl === level)
             ))
@@ -46,31 +46,31 @@ export default function LogTable() {
 
     return (
         <div className="space-y-10">
-            <h2 className="text-3xl font-bold">{__('Журнал', 'sc-autoparser')} {date}</h2>
+            <h2 className="text-3xl font-bold">{__('Журнал', 'autoparser')} {date}</h2>
 
             {/* filters */}
             <div className="flex flex-wrap gap-4">
                 <SelectControl
-                    label={__('День', 'sc-autoparser')}
+                    label={__('День', 'autoparser')}
                     value={date}
                     options={[
                         {label: today, value: today},
                         {label: yesterday, value: yesterday},
                     ]}
                     onChange={setDate}
-                    className="w-44 scap-select"
+                    className="w-44 autoparser-select"
                 />
-                <Button className="scap-btn scap-btn--secondary" onClick={fetchLogs}>
-                    {__('Оновити', 'sc-autoparser')}
+                <Button className="autoparser-btn autoparser-btn--secondary" onClick={fetchLogs}>
+                    {__('Оновити', 'autoparser')}
                 </Button>
             </div>
 
             {/* card */}
-            <div className="scap-card p-0 overflow-auto max-h-[70vh]">
-                <table className="scap-table scap-table--log">
+            <div className="autoparser-card p-0 overflow-auto max-h-[70vh]">
+                <table className="autoparser-table autoparser-table--log">
                     <thead>
                     <tr>
-                        <th>{__('Повідомлення', 'sc-autoparser')}</th>
+                        <th>{__('Повідомлення', 'autoparser')}</th>
                     </tr>
                     </thead>
 

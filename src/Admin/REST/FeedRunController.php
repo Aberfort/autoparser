@@ -1,10 +1,10 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
-use ScAutoParser\Parser\ParserService;
-use ScAutoParser\Feed\FeedRepository;
+use AutoParser\Parser\ParserService;
+use AutoParser\Feed\FeedRepository;
 
 class FeedRunController extends WP_REST_Controller {
 
@@ -12,7 +12,7 @@ class FeedRunController extends WP_REST_Controller {
 		private ParserService $parser,
 		private FeedRepository $repo,
 	) {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'feeds';
 	}
 

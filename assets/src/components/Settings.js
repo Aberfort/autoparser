@@ -25,7 +25,7 @@ export default function Settings() {
 
     /* ───────── fetch on mount ───────── */
     useEffect(() => {
-        apiFetch({path: '/sc-autoparser/v1/settings'})
+        apiFetch({path: '/autoparser/v1/settings'})
             .then(d => {
                 setKeyGemini(d.gemini_api_key || '');
                 setKeyOpenAI(d.openai_api_key || '');
@@ -40,7 +40,7 @@ export default function Settings() {
     const save = () => {
         setSaving(true);
         apiFetch({
-            path: '/sc-autoparser/v1/settings',
+            path: '/autoparser/v1/settings',
             method: 'POST',
             data: {
                 gemini_api_key: apiKeyGemini,
@@ -52,11 +52,11 @@ export default function Settings() {
         })
             .then(() => setNotice({
                 status: 'success',
-                text: __('Збережено ✅', 'sc-autoparser')
+                text: __('Збережено ✅', 'autoparser')
             }))
             .catch(() => setNotice({
                 status: 'error',
-                text: __('Помилка', 'sc-autoparser')
+                text: __('Помилка', 'autoparser')
             }))
             .finally(() => setSaving(false));
     };
@@ -66,59 +66,59 @@ export default function Settings() {
     /* ───────── UI ───────── */
     return (
         <div className="mx-auto space-y-10">
-            <div className="scap-card">
-                <div className="scap-card__head">
-                    <h2 className="text-xl font-semibold">{__('Налаштування API', 'sc-autoparser')}</h2>
+            <div className="autoparser-card">
+                <div className="autoparser-card__head">
+                    <h2 className="text-xl font-semibold">{__('Налаштування API', 'autoparser')}</h2>
                 </div>
 
                 <div className="p-10 space-y-8">
 
-                    {/*<label className="scap-label">*/}
+                    {/*<label className="autoparser-label">*/}
                     {/*    RapidAPI Key (API-Football)*/}
                     {/*    <TextControl*/}
                     {/*        type="password"*/}
                     {/*        value={fixturesKey}*/}
                     {/*        onChange={setFixturesKey}*/}
-                    {/*        className="scap-input"*/}
+                    {/*        className="autoparser-input"*/}
                     {/*    />*/}
                     {/*</label>*/}
 
-                    <label className="scap-label">
+                    <label className="autoparser-label">
                         Gemini API Key
                         <TextControl
                             type="password"
                             value={apiKeyGemini}
                             onChange={setKeyGemini}
-                            className="scap-input"
+                            className="autoparser-input"
                         />
                     </label>
 
-                    <label className="scap-label">
+                    <label className="autoparser-label">
                         OpenAI (GPT) API Key
                         <TextControl
                             type="password"
                             value={apiKeyOpenAI}
                             onChange={setKeyOpenAI}
-                            className="scap-input"
+                            className="autoparser-input"
                         />
                     </label>
 
-                    <label className="scap-label">
+                    <label className="autoparser-label">
                         OpenAI Model
                         <TextControl
                             value={openaiModel}
                             onChange={setOpenaiModel}
-                            className="scap-input"
+                            className="autoparser-input"
                         />
                     </label>
 
-                    <label className="scap-label">
-                        {__('Глобальний шаблон промпту', 'sc-autoparser')}
+                    <label className="autoparser-label">
+                        {__('Глобальний шаблон промпту', 'autoparser')}
                         <TextareaControl
                             rows={8}
                             value={prompt}
                             onChange={setPrompt}
-                            className="scap-textarea"
+                            className="autoparser-textarea"
                         />
                     </label>
 
@@ -128,8 +128,8 @@ export default function Settings() {
                         </Notice>}
 
                     <div className="flex justify-end">
-                        <Button className="scap-btn" disabled={saving} onClick={save}>
-                            {saving ? __('Зберігаємо…', 'sc-autoparser') : __('Зберегти', 'sc-autoparser')}
+                        <Button className="autoparser-btn" disabled={saving} onClick={save}>
+                            {saving ? __('Зберігаємо…', 'autoparser') : __('Зберегти', 'autoparser')}
                         </Button>
                     </div>
                 </div>

@@ -1,12 +1,12 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
 use WP_Error;
 
 /**
- * /sc-autoparser/v1/logs?date=YYYY-MM-DD&limit=500
+ * /autoparser/v1/logs?date=YYYY-MM-DD&limit=500
  */
 class LogController extends WP_REST_Controller {
 
@@ -14,7 +14,7 @@ class LogController extends WP_REST_Controller {
 
 	public function __construct( string $logDir ) {
 		$this->logDir    = $logDir;
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'logs';
 	}
 
@@ -38,9 +38,9 @@ class LogController extends WP_REST_Controller {
 		$date  = sanitize_file_name( $request->get_param( 'date' ) ?? date( 'Y-m-d' ) );
 		$limit = (int) ( $request->get_param( 'limit' ) ?? 500 );
 
-		$file = "{$this->logDir}/sc-autoparser-{$date}.log";
+		$file = "{$this->logDir}/autoparser-{$date}.log";
 		if ( ! file_exists( $file ) ) {
-			return new WP_Error( 'scap_no_log', 'Log file not found', array( 'status' => 404 ) );
+			return new WP_Error( 'autoparser_no_log', 'Log file not found', array( 'status' => 404 ) );
 		}
 
 		$lines = array_slice( file( $file, FILE_IGNORE_NEW_LINES ), - $limit );

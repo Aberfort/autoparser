@@ -1,5 +1,5 @@
 {
-  "name": "example/sc-autoparser",
+  "name": "example/autoparser",
   "description": "Automatic parser with Gemini AI rewrite & Gutenberg autoposting.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
@@ -18,7 +18,7 @@
   },
   "autoload": {
     "psr-4": {
-      "ScAutoParser\\": "src/"
+      "AutoParser\\": "src/"
     }
   },
   "scripts": {

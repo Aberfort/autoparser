@@ -1,7 +1,7 @@
 {
-  "name": "sc-autoparser",
+  "name": "autoparser",
   "version": "0.1.0",
-  "description": "Admin React app for SC Autoparser WordPress plugin",
+  "description": "Admin React app for Autoparser WordPress plugin",
   "private": true,
   "scripts": {
     "start": "wp-scripts start --output-path=assets/build assets/src/index.js assets/style.scss",

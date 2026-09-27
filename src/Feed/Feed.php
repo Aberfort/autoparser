@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
 /**
  * Value-object that represents a single Feed entity.
@@ -23,7 +23,7 @@ class Feed {
 		public string $detail_prompt = '',
 		public string $thumbnail_mode = 'first', // 'first' | 'manual'
 		public ?int $thumbnail_id = null,
-		public string $image_dir = '/sc-autoparser',
+		public string $image_dir = '/autoparser',
 		public ?string $created_at = null,
 		public ?string $updated_at = null,
 		public string $last_status = 'never',

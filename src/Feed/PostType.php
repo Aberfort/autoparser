@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
 /**
  * Registers CPT `sc_feed` for convenient list-table in WP-Admin.

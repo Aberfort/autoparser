@@ -1,9 +1,9 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
 use OpenAI;
-use ScAutoParser\AI\Contract\ProviderInterface;
+use AutoParser\AI\Contract\ProviderInterface;
 
 class OpenAIProvider implements ProviderInterface {
 

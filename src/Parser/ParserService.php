@@ -6,22 +6,22 @@
  *  • URL заданий   → RSS / XML-парсинг + AI-рерайт.
  */
 
-namespace ScAutoParser\Parser;
+namespace AutoParser\Parser;
 
 use GuzzleHttp\Client;
-use ScAutoParser\AI\PredictionService;
-use ScAutoParser\AI\RewriteService;
-use ScAutoParser\Core\Logger;
-use ScAutoParser\Feed\Feed;
-use ScAutoParser\Feed\FeedRepository;
-use ScAutoParser\Feed\PostMapRepository;
-use ScAutoParser\Publisher\GutenbergPublisher;
-use ScAutoParser\Fixtures\FixturesService;
-use ScAutoParser\AI\ProviderFactory;
-use ScAutoParser\AI\RewriteService as DynamicRewrite;
-use ScAutoParser\AI\PredictionService as DynamicPredict;
+use AutoParser\AI\PredictionService;
+use AutoParser\AI\RewriteService;
+use AutoParser\Core\Logger;
+use AutoParser\Feed\Feed;
+use AutoParser\Feed\FeedRepository;
+use AutoParser\Feed\PostMapRepository;
+use AutoParser\Publisher\GutenbergPublisher;
+use AutoParser\Fixtures\FixturesService;
+use AutoParser\AI\ProviderFactory;
+use AutoParser\AI\RewriteService as DynamicRewrite;
+use AutoParser\AI\PredictionService as DynamicPredict;
 use Symfony\Component\DomCrawler\Crawler;
-use ScAutoParser\Util\UrlCanonicalizer;
+use AutoParser\Util\UrlCanonicalizer;
 
 class ParserService
 {
@@ -115,7 +115,7 @@ PROMPT;
             $this->feeds->update_status(
                 $feed->id,
                 'ok',
-                __('Матчів немає', 'sc-autoparser')
+                __('Матчів немає', 'autoparser')
             );
 
             return;
@@ -184,11 +184,11 @@ PROMPT;
                     'Додано %d прогноз',
                     'Додано %d прогнози',
                     $posted,
-                    'sc-autoparser'
+                    'autoparser'
                 ),
                 $posted
             )
-            : __('Матчів немає', 'sc-autoparser');
+            : __('Матчів немає', 'autoparser');
 
         $this->feeds->update_status($feed->id, 'ok', $msg);
     }
@@ -219,7 +219,7 @@ PROMPT;
                     $url,
                     [
                         'headers' => [
-                            'User-Agent' => \ScAutoParser\Core\Helpers::random_ua(
+                            'User-Agent' => \AutoParser\Core\Helpers::random_ua(
                             ),
                         ],
                         'timeout' => 15,
@@ -256,7 +256,7 @@ PROMPT;
                 $thumbId = null;
                 if ($feed->thumbnail_mode === 'first') {
                     if ($rssImg) {
-                        $thumbId = \ScAutoParser\Core\Helpers::sideload_image(
+                        $thumbId = \AutoParser\Core\Helpers::sideload_image(
                             $rssImg,
                             $feed->image_dir
                         );
@@ -340,10 +340,10 @@ PROMPT;
 
         $msg = $posted
             ? sprintf(
-                _n('Added %d post', 'Added %d posts', $posted, 'sc-autoparser'),
+                _n('Added %d post', 'Added %d posts', $posted, 'autoparser'),
                 $posted
             )
-            : __('No new items found', 'sc-autoparser');
+            : __('No new items found', 'autoparser');
 
         $this->feeds->update_status($feed->id, 'ok', $msg);
         $this->log->info(
@@ -658,7 +658,7 @@ PROMPT;
         try {
             $src = $c->filterXPath('//img/@src')->first()->text();
 
-            return \ScAutoParser\Core\Helpers::sideload_image($src, $dir);
+            return \AutoParser\Core\Helpers::sideload_image($src, $dir);
         } catch (\Throwable) {
             return null;
         }

@@ -1,12 +1,12 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
-use ScAutoParser\Core\Logger;
+use AutoParser\Core\Logger;
 use wpdb;
 
 /**
- * CRUD around the `scap_feeds` table.
+ * CRUD around the `autoparser_feeds` table.
  */
 class FeedRepository {
 
@@ -16,7 +16,7 @@ class FeedRepository {
 		private wpdb $db,
 		private Logger $log
 	) {
-		$this->table = $this->db->prefix . 'scap_feeds';
+		$this->table = $this->db->prefix . 'autoparser_feeds';
 	}
 
 	/* ---------- Installation ---------- */

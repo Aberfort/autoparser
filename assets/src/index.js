@@ -10,20 +10,20 @@ import LogTable from './components/LogTable';
 import CronTable from './components/CronTable';
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('[id^="scap-root-"]')) {
-        document.body.classList.add('scap-admin');
+    if (document.querySelector('[id^="autoparser-root-"]')) {
+        document.body.classList.add('autoparser-admin');
     }
 
     const qs = new URLSearchParams(window.location.search);
     const feedId = qs.get('feed');
 
     const mounts = {
-        'scap-root-list': <FeedList/>,
-        'scap-root-add': <FeedFormStandalone/>,
-        'scap-root-edit': <FeedFormEdit feedId={feedId}/>,
-        'scap-root-settings': <Settings/>,
-        'scap-root-log': <LogTable/>,
-        'scap-root-cron': <CronTable/>,
+        'autoparser-root-list': <FeedList/>,
+        'autoparser-root-add': <FeedFormStandalone/>,
+        'autoparser-root-edit': <FeedFormEdit feedId={feedId}/>,
+        'autoparser-root-settings': <Settings/>,
+        'autoparser-root-log': <LogTable/>,
+        'autoparser-root-cron': <CronTable/>,
     };
 
     Object.entries(mounts).forEach(([id, node]) => {

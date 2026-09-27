@@ -1,12 +1,12 @@
 /**
- * WP-data store  (namespace: sc/feeds)
+ * WP-data store  (namespace: autoparser/feeds)
  */
 import {registerStore} from '@wordpress/data';
 import {controls} from '@wordpress/data-controls';
 import apiFetch from '@wordpress/api-fetch';
 
-export const STORE_KEY = 'sc/feeds';
-const ENDPOINT = '/sc-autoparser/v1/feeds';
+export const STORE_KEY = 'autoparser/feeds';
+const ENDPOINT = '/autoparser/v1/feeds';
 
 /* ---------- state ---------- */
 const DEFAULT_STATE = {
@@ -41,7 +41,7 @@ const actions = {
 
     * runFeed(id) {
         yield apiFetch({
-            path: `/sc-autoparser/v1/feeds/${id}/run`,
+            path: `/autoparser/v1/feeds/${id}/run`,
             method: 'POST',
             credentials: 'same-origin',
         });

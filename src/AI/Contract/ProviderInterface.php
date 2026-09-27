@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\AI\Contract;
+namespace AutoParser\AI\Contract;
 
 /**
  * Generic AI provider (Gemini, OpenAI, …)

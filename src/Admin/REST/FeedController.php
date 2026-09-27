@@ -1,10 +1,10 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
-use ScAutoParser\Feed\FeedRepository;
-use ScAutoParser\Feed\Feed;
-use ScAutoParser\Cron\Scheduler;
+use AutoParser\Feed\FeedRepository;
+use AutoParser\Feed\Feed;
+use AutoParser\Cron\Scheduler;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
@@ -15,7 +15,7 @@ class FeedController extends WP_REST_Controller {
 		private FeedRepository $repo,
 		private Scheduler $scheduler
 	) {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'feeds';
 	}
 
@@ -70,7 +70,7 @@ class FeedController extends WP_REST_Controller {
 
 		return $feed
 			? rest_ensure_response( $this->to_array( $feed ) )
-			: new WP_Error( 'scap_not_found', 'Feed not found', array( 'status' => 404 ) );
+			: new WP_Error( 'autoparser_not_found', 'Feed not found', array( 'status' => 404 ) );
 	}
 
 	public function create_item( $request ) {
@@ -86,13 +86,13 @@ class FeedController extends WP_REST_Controller {
 	public function update_item( $request ) {
 		$feed = $this->repo->find( (int) $request['id'] );
 		if ( ! $feed ) {
-			return new WP_Error( 'scap_not_found', 'Feed not found', array( 'status' => 404 ) );
+			return new WP_Error( 'autoparser_not_found', 'Feed not found', array( 'status' => 404 ) );
 		}
 		$feed = $this->from_request( $request, $feed );
 		$this->repo->save( $feed );
 
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'sc_autoparser_run_feed', array( $feed->id ), 'sc-autoparser' );
+			as_unschedule_all_actions( 'autoparser_run_feed', array( $feed->id ), 'autoparser' );
 		}
 		if ( $feed->active ) {
 			$this->scheduler->schedule_feed( $feed );
@@ -104,13 +104,13 @@ class FeedController extends WP_REST_Controller {
 	public function delete_item( $request ) {
 		$id = (int) $request['id'];
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'sc_autoparser_run_feed', array( $id ), 'sc-autoparser' );
+			as_unschedule_all_actions( 'autoparser_run_feed', array( $id ), 'autoparser' );
 		}
 		$ok = $this->repo->delete( $id );
 
 		return $ok
 			? rest_ensure_response( array( 'deleted' => true ) )
-			: new WP_Error( 'scap_delete_failed', 'Delete failed', array( 'status' => 500 ) );
+			: new WP_Error( 'autoparser_delete_failed', 'Delete failed', array( 'status' => 500 ) );
 	}
 
 	public function permissions(): bool {

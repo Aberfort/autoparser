@@ -5,10 +5,10 @@
  * Дає TOP-матчі «сьогодні» з урахуванням локальної TZ WordPress.
  */
 
-namespace ScAutoParser\Fixtures;
+namespace AutoParser\Fixtures;
 
 use GuzzleHttp\Client;
-use ScAutoParser\Core\Logger;
+use AutoParser\Core\Logger;
 
 class FixturesService {
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace ScAutoParser\CLI;
+namespace AutoParser\CLI;
 
-use ScAutoParser\Parser\ParserService;
+use AutoParser\Parser\ParserService;
 use WP_CLI;
 
 /**
- * WP-CLI: wp sc-parser run [--feed=<id>]
+ * WP-CLI: wp autoparser run [--feed=<id>]
  */
 class RunCommand {
 
@@ -23,8 +23,8 @@ class RunCommand {
 	 * : Run only specified feed ID.
 	 *
 	 * ## EXAMPLES
-	 *     wp sc-parser run
-	 *     wp sc-parser run --feed=3
+	 *     wp autoparser run
+	 *     wp autoparser run --feed=3
 	 *
 	 * @when after_wp_load
 	 */

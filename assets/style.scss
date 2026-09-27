@@ -1,5 +1,5 @@
 /* ==================================================================
- *  SC Autoparser – Ultra Glass UI v2.3
+ *  Autoparser – Ultra Glass UI v2.3
  * ==================================================================*/
 
 @tailwind base;
@@ -9,44 +9,44 @@
 
 /* ---------- TOKENS ---------- */
 :root {
-  --scap-primary: #6c7bff;
-  --scap-primary-end: #8e5bff;
-  --scap-danger: #ff6464;
-  --scap-success: #34d399;
-  --scap-bg-card: hsla(0 0% 100%/.8);
-  --scap-bg-muted: #f3f4f7;
-  --scap-bg-page: #e5e7eb;
-  --scap-border: #d1d5db;
-  --scap-radius: 1rem;
-  --scap-glass-blur: 14px;
-  --scap-shadow-sm: 0 2px 6px rgba(0, 0, 0, .06);
-  --scap-shadow-md: 0 8px 24px rgba(0, 0, 0, .1);
-  --scap-speed: .25s;
+  --autoparser-primary: #6c7bff;
+  --autoparser-primary-end: #8e5bff;
+  --autoparser-danger: #ff6464;
+  --autoparser-success: #34d399;
+  --autoparser-bg-card: hsla(0 0% 100%/.8);
+  --autoparser-bg-muted: #f3f4f7;
+  --autoparser-bg-page: #e5e7eb;
+  --autoparser-border: #d1d5db;
+  --autoparser-radius: 1rem;
+  --autoparser-glass-blur: 14px;
+  --autoparser-shadow-sm: 0 2px 6px rgba(0, 0, 0, .06);
+  --autoparser-shadow-md: 0 8px 24px rgba(0, 0, 0, .1);
+  --autoparser-speed: .25s;
 }
 
 @media(prefers-color-scheme: dark) {
   :root {
-    --scap-primary: #8d9eff;
-    --scap-primary-end: #b08aff;
-    --scap-bg-card: hsla(217 32% 17%/.55);
-    --scap-bg-muted: #1e293b;
-    --scap-bg-page: #111827;
-    --scap-border: #334155;
-    --scap-shadow-md: 0 10px 28px rgba(0, 0, 0, .65);
+    --autoparser-primary: #8d9eff;
+    --autoparser-primary-end: #b08aff;
+    --autoparser-bg-card: hsla(217 32% 17%/.55);
+    --autoparser-bg-muted: #1e293b;
+    --autoparser-bg-page: #111827;
+    --autoparser-border: #334155;
+    --autoparser-shadow-md: 0 10px 28px rgba(0, 0, 0, .65);
   }
 }
 
 /* ---------- BASE BG ---------- */
-body.scap-admin {
+body.autoparser-admin {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(120deg, var(--scap-bg-page) 0%, var(--scap-bg-muted) 100%),
+  background: linear-gradient(120deg, var(--autoparser-bg-page) 0%, var(--autoparser-bg-muted) 100%),
   url("data:image/svg+xml,%3Csvg width='160' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
   background-size: cover, 200px 200px;
   color: #1f2937;
 }
 
 @media(prefers-color-scheme: dark) {
-  body.scap-admin {
+  body.autoparser-admin {
     color: #e2e8f0;
   }
 }
@@ -73,28 +73,28 @@ body.scap-admin {
 /* =================================================================
  *  CARD
  * =================================================================*/
-.scap-card {
+.autoparser-card {
   position: relative;
-  border-radius: var(--scap-radius);
-  background: var(--scap-bg-card);
-  border: 1px solid var(--scap-border);
-  box-shadow: var(--scap-shadow-md);
+  border-radius: var(--autoparser-radius);
+  background: var(--autoparser-bg-card);
+  border: 1px solid var(--autoparser-border);
+  box-shadow: var(--autoparser-shadow-md);
 }
 
-.scap-card__head {
+.autoparser-card__head {
   @apply flex items-center justify-between;
   padding: 1.75rem 2.25rem;
   color: #fff;
-  background: linear-gradient(145deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+  background: linear-gradient(145deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
 }
 
 /* =================================================================
  *  BUTTONS (soft gradient, head-contrast shadow)
  * =================================================================*/
-.scap-btn {
-  --bg1: var(--scap-primary);
-  --bg2: var(--scap-primary-end);
+.autoparser-btn {
+  --bg1: var(--autoparser-primary);
+  --bg2: var(--autoparser-primary-end);
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -109,45 +109,45 @@ body.scap-admin {
   transition: transform .18s, box-shadow .18s;
 }
 
-.scap-btn:hover {
+.autoparser-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 22px rgba(0, 0, 0, .14);
 }
 
-.scap-btn:active {
+.autoparser-btn:active {
   transform: none;
   box-shadow: 0 3px 9px rgba(0, 0, 0, .16);
 }
 
-.scap-card__head .scap-btn {
+.autoparser-card__head .autoparser-btn {
   box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
 }
 
 /* << */
-.scap-btn:focus-visible {
+.autoparser-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 4px rgba(108, 123, 255, .45);
 }
 
-.scap-btn--secondary {
+.autoparser-btn--secondary {
   --bg1: #fff0;
   --bg2: #fff0;
-  color: var(--scap-primary);
-  border: 1px solid var(--scap-primary);
+  color: var(--autoparser-primary);
+  border: 1px solid var(--autoparser-primary);
   background: #0000;
 }
 
-.scap-btn--secondary:hover {
-  background: linear-gradient(135deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+.autoparser-btn--secondary:hover {
+  background: linear-gradient(135deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
   color: #fff;
 }
 
-.scap-btn--danger {
-  --bg1: var(--scap-danger);
+.autoparser-btn--danger {
+  --bg1: var(--autoparser-danger);
   --bg2: #ff8989;
 }
 
-.scap-btn--icon {
+.autoparser-btn--icon {
   width: 2.75rem;
   height: 2.75rem;
   padding: .55rem;
@@ -161,16 +161,16 @@ body.scap-admin {
   font-size: .95rem;
   padding: .7rem 1rem;
   border-radius: .65rem;
-  border: 1px solid var(--scap-border);
+  border: 1px solid var(--autoparser-border);
   background: hsla(0 0% 100%/.7);
   backdrop-filter: blur(8px);
-  transition: border var(--scap-speed), box-shadow var(--scap-speed), transform var(--scap-speed);
+  transition: border var(--autoparser-speed), box-shadow var(--autoparser-speed), transform var(--autoparser-speed);
   &::placeholder {
     color: #9ca3af;
     font-weight: 500;
   }
   &:focus {
-    border-color: var(--scap-primary);
+    border-color: var(--autoparser-primary);
     box-shadow: 0 0 0 3px rgba(108, 123, 255, .35);
     outline: none;
   }
@@ -183,17 +183,17 @@ body.scap-admin {
 }
 
 /* explicit */
-.scap-input {
+.autoparser-input {
   @include glass-input;
 }
 
-.scap-textarea {
+.autoparser-textarea {
   @include glass-input;
   resize: vertical;
   min-height: 7rem;
 }
 
-.scap-select {
+.autoparser-select {
   @include glass-input;
   padding-right: 2.8rem;
   appearance: none;
@@ -204,7 +204,7 @@ body.scap-admin {
 }
 
 @media(prefers-color-scheme: dark) {
-  .scap-select {
+  .autoparser-select {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
   }
 }
@@ -212,37 +212,37 @@ body.scap-admin {
 /* =================================================================
  *  SELECT[multiple]  (категорії)
  * =================================================================*/
-select[multiple].scap-select {
+select[multiple].autoparser-select {
   min-height: 10rem !important;
   overflow: auto !important;
   cursor: default !important;
 }
 
-select[multiple].scap-select option {
+select[multiple].autoparser-select option {
   padding: .35rem .8rem;
 }
 
-select[multiple].scap-select option:checked {
-  background: var(--scap-primary);
+select[multiple].autoparser-select option:checked {
+  background: var(--autoparser-primary);
   color: #fff;
 }
 
 /* =================================================================
  *  TOGGLE, BADGES, TABLE, HEADINGS  (без змін з v2.2)
  * =================================================================*/
-.scap-toggle {
+.autoparser-toggle {
   position: relative;
   width: 48px;
   height: 26px;
 }
 
-.scap-toggle input {
+.autoparser-toggle input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.scap-toggle span {
+.autoparser-toggle span {
   position: absolute;
   inset: 0;
   border-radius: 999px;
@@ -250,7 +250,7 @@ select[multiple].scap-select option:checked {
   transition: background .25s;
 }
 
-.scap-toggle span::after {
+.autoparser-toggle span::after {
   content: '';
   position: absolute;
   top: 3px;
@@ -263,11 +263,11 @@ select[multiple].scap-select option:checked {
   transition: transform .25s;
 }
 
-.scap-toggle input:checked + span {
-  background: var(--scap-primary);
+.autoparser-toggle input:checked + span {
+  background: var(--autoparser-primary);
 }
 
-.scap-toggle input:checked + span::after {
+.autoparser-toggle input:checked + span::after {
   transform: translateX(22px);
 }
 
@@ -301,19 +301,19 @@ select[multiple].scap-select option:checked {
   background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
 }
 
-.scap-table {
+.autoparser-table {
   width: 100%;
   border-collapse: collapse;
   font-size: .9rem;
 }
 
-.scap-table thead th {
+.autoparser-table thead th {
   top: 60px;
   z-index: 20;
   padding: .95rem 1rem;
-  background: var(--scap-bg-card);
+  background: var(--autoparser-bg-card);
   backdrop-filter: blur(8px);
-  border-bottom: 2px solid var(--scap-border);
+  border-bottom: 2px solid var(--autoparser-border);
   font-weight: 700;
   font-size: .78rem;
   text-transform: uppercase;
@@ -321,44 +321,44 @@ select[multiple].scap-select option:checked {
   text-align: left;
 }
 
-.scap-table tbody tr {
+.autoparser-table tbody tr {
   transition: background .18s, transform .18s;
 }
 
-.scap-table tbody tr:nth-child(odd) {
+.autoparser-table tbody tr:nth-child(odd) {
   background: rgba(0, 0, 0, .02);
 }
 
-.scap-table tbody tr:hover {
+.autoparser-table tbody tr:hover {
   background: hsla(232 50% 94%/.6);
   transform: scale(1.005);
 }
 
 @media(prefers-color-scheme: dark) {
-  .scap-table tbody tr:nth-child(odd) {
+  .autoparser-table tbody tr:nth-child(odd) {
     background: rgba(255, 255, 255, .02);
   }
-  .scap-table tbody tr:hover {
+  .autoparser-table tbody tr:hover {
     background: hsla(217 32% 20%/.6);
   }
 }
 
-.scap-table td {
+.autoparser-table td {
   padding: .85rem 1rem;
 }
 
-.scap-table--log {
+.autoparser-table--log {
   table-layout: fixed;
   width: 100%;
   min-width: 600px;
 }
 
-.scap-table--log td:first-child {
+.autoparser-table--log td:first-child {
   font-family: monospace;
   white-space: nowrap;
 }
 
-h2.text-3xl, h2.text-2xl, .scap-card__head h2 {
+h2.text-3xl, h2.text-2xl, .autoparser-card__head h2 {
   position: relative;
 }
 
@@ -370,7 +370,7 @@ h2.text-3xl::after, h2.text-2xl::after {
   width: 60px;
   height: 3px;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--scap-primary) 0%, var(--scap-primary-end) 100%);
+  background: linear-gradient(90deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
   background-size: 200% 100%;
   animation: shine 3s linear infinite;
 }
@@ -378,12 +378,12 @@ h2.text-3xl::after, h2.text-2xl::after {
 /* =================================================================
  *  FORM GRID & LABELS
  * =================================================================*/
-.scap-form {
+.autoparser-form {
   display: flex;
   gap: 2.5rem 3.5rem;
 }
 
-.scap-fieldset {
+.autoparser-fieldset {
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -393,14 +393,14 @@ h2.text-3xl::after, h2.text-2xl::after {
   padding: 0;
 }
 
-.scap-fieldset > legend {
+.autoparser-fieldset > legend {
   font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: .4rem;
-  color: var(--scap-primary);
+  color: var(--autoparser-primary);
 }
 
-.scap-label {
+.autoparser-label {
   display: flex;
   flex-direction: column;
   gap: .45rem;
@@ -411,34 +411,34 @@ h2.text-3xl::after, h2.text-2xl::after {
 /* =================================================================
  *  CORE-OVERRIDES
  * =================================================================*/
-.scap-admin {
+.autoparser-admin {
 
-  .scap-form .scap-input,
-  .scap-form .scap-select,
-  .scap-form .scap-textarea {
+  .autoparser-form .autoparser-input,
+  .autoparser-form .autoparser-select,
+  .autoparser-form .autoparser-textarea {
     width: 100% !important;
     max-width: -webkit-fill-available;
   }
 
-  input.scap-input,
-  input.components-text-control__input.scap-input,
-  input.components-number-control__input.scap-input,
-  .wp-core-ui input.scap-input {
+  input.autoparser-input,
+  input.components-text-control__input.autoparser-input,
+  input.components-number-control__input.autoparser-input,
+  .wp-core-ui input.autoparser-input {
     @include glass-input;
   }
 
-  textarea.scap-textarea,
-  textarea.components-textarea-control__input.scap-textarea,
-  .wp-core-ui textarea.scap-textarea {
+  textarea.autoparser-textarea,
+  textarea.components-textarea-control__input.autoparser-textarea,
+  .wp-core-ui textarea.autoparser-textarea {
     all: unset;
     @include glass-input;
     resize: vertical;
     min-height: 7rem;
   }
 
-  select.scap-select,
-  select.components-select-control__input.scap-select,
-  .wp-core-ui select.scap-select {
+  select.autoparser-select,
+  select.components-select-control__input.autoparser-select,
+  .wp-core-ui select.autoparser-select {
     all: unset;
     @include glass-input;
     padding-right: 2.8rem;
@@ -450,9 +450,9 @@ h2.text-3xl::after, h2.text-2xl::after {
   }
 
   @media(prefers-color-scheme: dark) {
-    select.scap-select,
-    select.components-select-control__input.scap-select,
-    .wp-core-ui select.scap-select {
+    select.autoparser-select,
+    select.components-select-control__input.autoparser-select,
+    .wp-core-ui select.autoparser-select {
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
     }
   }
@@ -486,7 +486,7 @@ h2.text-3xl::after, h2.text-2xl::after {
 }
 
 /* prevent long log JSON from stretching row height */
-.scap-table--log td {
+.autoparser-table--log td {
   vertical-align: top;
   padding-top: .6rem;
   padding-bottom: .6rem;
@@ -494,13 +494,13 @@ h2.text-3xl::after, h2.text-2xl::after {
 }
 
 /* optional: thin custom scrollbar inside log card */
-.scap-card::-webkit-scrollbar {
+.autoparser-card::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 
-.scap-card::-webkit-scrollbar-thumb {
-  background: var(--scap-primary-end);
+.autoparser-card::-webkit-scrollbar-thumb {
+  background: var(--autoparser-primary-end);
   border-radius: 4px;
 }
 
@@ -508,13 +508,13 @@ h2.text-3xl::after, h2.text-2xl::after {
 /* =================================================================
  *  AUTOFILL fix
  * =================================================================*/
-input.scap-input:-webkit-autofill {
+input.autoparser-input:-webkit-autofill {
   box-shadow: 0 0 0 1000px hsla(0, 0%, 100%, .7) inset !important;
   -webkit-text-fill-color: inherit !important;
 }
 
 @media(prefers-color-scheme: dark) {
-  input.scap-input:-webkit-autofill {
+  input.autoparser-input:-webkit-autofill {
     box-shadow: 0 0 0 1000px hsla(217 32% 17%/.55) inset !important;
   }
 }
