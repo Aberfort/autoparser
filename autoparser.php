@@ -27,6 +27,14 @@ define( 'AUTOPARSER_URL', plugin_dir_url( __FILE__ ) );
 define( 'AUTOPARSER_VERSION', '0.1.10' );
 
 /*
+ * Schema version for the plugin's custom DB tables — independent of
+ * AUTOPARSER_VERSION. Bump this whenever FeedRepository/PostMapRepository's
+ * CREATE TABLE SQL changes, so Migrator re-runs dbDelta() on existing
+ * installs. See src/Core/Migrator.php.
+ */
+define( 'AUTOPARSER_DB_VERSION', '1' );
+
+/*
  * Composer autoloader.
  */
 require_once AUTOPARSER_DIR . 'vendor/autoload.php';

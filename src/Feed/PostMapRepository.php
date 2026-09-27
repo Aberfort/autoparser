@@ -16,7 +16,6 @@ class PostMapRepository {
 
 	public function __construct( private wpdb $db ) {
 		$this->table = $this->db->prefix . 'autoparser_posts_map';
-		$this->maybe_create_table();
 	}
 
 	/* ---------- Public API ---------- */
@@ -26,9 +25,17 @@ class PostMapRepository {
 	 * FALSE → post missing OR in Trash OR mapping not found
 	 */
 	public function exists( int|string $feedId, string $url ): bool {
-		$post = $this->getMappedPost( $feedId, $url );
+		$post         = $this->getMappedPost( $feedId, $url );
+		$is_duplicate = $post && $post->post_status !== 'trash';
 
-		return $post && $post->post_status !== 'trash';
+		/**
+		 * Filters whether a URL is considered a duplicate (already imported) for a feed.
+		 *
+		 * @param bool        $is_duplicate
+		 * @param string      $url
+		 * @param int|string  $feedId
+		 */
+		return (bool) apply_filters( 'autoparser_is_duplicate', $is_duplicate, $url, $feedId );
 	}
 
 	/**
@@ -69,13 +76,12 @@ class PostMapRepository {
 		return $postId ? get_post( (int) $postId ) : null;
 	}
 
-	private function maybe_create_table(): void {
-		if ( $this->db->get_var(
-			$this->db->prepare( 'SHOW TABLES LIKE %s', $this->table )
-		)
-		) {
-			return;
-		}
+	/**
+	 * Idempotent: dbDelta() creates the table if missing and adds any
+	 * columns/keys that were added to the schema since, so this is safe
+	 * to call on every migration run rather than only once.
+	 */
+	public function create_table(): void {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta(
 			"CREATE TABLE {$this->table} (

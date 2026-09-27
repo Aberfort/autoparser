@@ -116,6 +116,7 @@ class GutenbergPublisher {
 
 		if ( $feed->predict_only ) {
 			$postArgs['post_content'] = '';
+			$postArgs                 = apply_filters( 'autoparser_post_args', $postArgs, $feed, $title, $html );
 			$postId                   = wp_insert_post( $postArgs );
 
 			if ( function_exists( 'add_row' ) ) {
@@ -162,8 +163,26 @@ class GutenbergPublisher {
 			}
 
 			$postArgs['post_content'] = serialize_blocks( $blocks );
-			$postId                   = wp_insert_post( $postArgs );
+
+			/**
+			 * Filters the wp_insert_post() args before a feed-generated post is inserted.
+			 *
+			 * @param array  $postArgs
+			 * @param Feed   $feed
+			 * @param string $title
+			 * @param string $html Rewritten content (or forecast HTML) before block-serialization.
+			 */
+			$postArgs = apply_filters( 'autoparser_post_args', $postArgs, $feed, $title, $html );
+			$postId   = wp_insert_post( $postArgs );
 		}
+
+		/**
+		 * Fires after a feed-generated post has been inserted.
+		 *
+		 * @param int  $postId
+		 * @param Feed $feed
+		 */
+		do_action( 'autoparser_post_published', $postId, $feed );
 
 		return $postId;
 	}

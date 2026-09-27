@@ -91,26 +91,39 @@ PROMPT;
 			)
 		);
 
+		/**
+		 * Fires right before a feed run starts (AI-only or RSS).
+		 *
+		 * @param Feed $feed The feed about to run.
+		 */
+		do_action( 'autoparser_before_run_feed', $feed );
+
 		/* AI-only feed (url == '') */
 		if ( $feed->url === '' ) {
-			$this->handle_ai_predictions( $feed, $predictor );
+			$result = $this->handle_ai_predictions( $feed, $predictor );
+		} else {
+			/*
+			Import only items newer than last_ts,             *
+			 *   except those whose previous post is deleted.   */
+			$cutOff = (int) $feed->last_ts;
 
-			return;
+			$result = $this->handle_rss( $feed, $rewriter, $cutOff );
 		}
 
-		/*
-		Import only items newer than last_ts,             *
-		 *   except those whose previous post is deleted.   */
-		$cutOff = (int) $feed->last_ts;
-
-		$this->handle_rss( $feed, $rewriter, $cutOff );
+		/**
+		 * Fires after a feed run finishes, successfully or not.
+		 *
+		 * @param Feed  $feed   The feed that just ran.
+		 * @param array $result { 'posted' => int, 'status' => string }
+		 */
+		do_action( 'autoparser_after_run_feed', $feed, $result );
 	}
 
 	/* ---------- AI-прогнози ---------- */
 	private function handle_ai_predictions(
 		Feed $feed,
 		DynamicPredict $predictor
-	): void {
+	): array {
 		$rows = $this->fixtures->todayTop( $feed->limit );
 
 		if ( ! $rows ) {
@@ -120,7 +133,10 @@ PROMPT;
 				__( 'Матчів немає', 'autoparser' )
 			);
 
-			return;
+			return array(
+				'posted' => 0,
+				'status' => 'ok',
+			);
 		}
 
 		$posted = 0;
@@ -157,6 +173,15 @@ PROMPT;
 					'{{teams}}'    => "$team1 vs $team2",
 				)
 			);
+
+			/**
+			 * Filters the prompt sent to the AI provider.
+			 *
+			 * @param string $prompt The built prompt.
+			 * @param Feed   $feed   The feed being processed.
+			 * @param string $type   'title' | 'body' | 'forecast'.
+			 */
+			$prompt = apply_filters( 'autoparser_rewrite_prompt', $prompt, $feed, 'forecast' );
 
 			try {
 				$html = $predictor->getForecast( $prompt, array() );
@@ -196,6 +221,11 @@ PROMPT;
 			: __( 'Матчів немає', 'autoparser' );
 
 		$this->feeds->update_status( $feed->id, 'ok', $msg );
+
+		return array(
+			'posted' => $posted,
+			'status' => 'ok',
+		);
 	}
 
 	/* ---------- RSS / XML-постинг ---------- */
@@ -204,7 +234,7 @@ PROMPT;
 		Feed $feed,
 		DynamicRewrite $rewriter,
 		int $cutOff
-	): void {
+	): array {
 		$rows     = $this->discover_urls( $feed, $cutOff );   // already limited
 		$posted   = 0;
 		$maxTsNew = 0;                                    // track newest ts
@@ -220,16 +250,36 @@ PROMPT;
 			}
 
 			try {
-				$html = (string) $this->http->get(
-					$url,
+				/**
+				 * Filters the User-Agent used to fetch a feed's source page.
+				 *
+				 * @param string $user_agent
+				 * @param string $url
+				 */
+				$user_agent = apply_filters(
+					'autoparser_user_agent',
+					\AutoParser\Core\Helpers::random_ua(),
+					$url
+				);
+
+				/**
+				 * Filters the Guzzle request options used to fetch a feed's source page.
+				 *
+				 * @param array $options
+				 * @param string $url
+				 * @param Feed  $feed
+				 */
+				$http_options = apply_filters(
+					'autoparser_http_options',
 					array(
-						'headers' => array(
-							'User-Agent' => \AutoParser\Core\Helpers::random_ua(
-							),
-						),
+						'headers' => array( 'User-Agent' => $user_agent ),
 						'timeout' => 15,
-					)
-				)->getBody();
+					),
+					$url,
+					$feed
+				);
+
+				$html = (string) $this->http->get( $url, $http_options )->getBody();
 
 				$crawler = new Crawler( $html );
 				$content = $this->extractBoundedContent(
@@ -237,6 +287,15 @@ PROMPT;
 					$feed->selector,
 					$feed->selector_end
 				);
+
+				/**
+				 * Filters the extracted content before it's sent for AI rewrite.
+				 *
+				 * @param string  $content
+				 * @param Feed    $feed
+				 * @param Crawler $crawler
+				 */
+				$content = apply_filters( 'autoparser_extracted_content', $content, $feed, $crawler );
 
 				$titleOriginal = $crawler->filter( 'title' )->text( '' );
 				$teams         = $this->parse_teams_from_title( $titleOriginal );
@@ -249,6 +308,10 @@ PROMPT;
 				$titlePrompt = trim( $titlePrompt )
 					?: 'Перепиши цей заголовок унікально, зберігши мову та зміст.';
 				$bodyPrompt  = trim( $bodyPrompt );
+
+				/** @see handle_ai_predictions() for the filter doc. */
+				$titlePrompt = apply_filters( 'autoparser_rewrite_prompt', $titlePrompt, $feed, 'title' );
+				$bodyPrompt  = apply_filters( 'autoparser_rewrite_prompt', $bodyPrompt, $feed, 'body' );
 
 				$title = trim( $rewriter->rewrite( $titleOriginal, $titlePrompt ) )
 					?: $titleOriginal;
@@ -361,6 +424,11 @@ PROMPT;
 				'checked'   => count( $rows ),
 				'new_count' => $posted,
 			)
+		);
+
+		return array(
+			'posted' => $posted,
+			'status' => 'ok',
 		);
 	}
 

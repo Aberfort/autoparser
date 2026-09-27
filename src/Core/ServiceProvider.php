@@ -10,7 +10,6 @@ use Pimple\ServiceProviderInterface;
 use GuzzleHttp\Client;
 use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
-use AutoParser\Feed\PostType;
 use AutoParser\Admin\Controller as AdminController;
 use AutoParser\Admin\REST\FeedController as FeedRest;
 use AutoParser\Admin\REST\FeedRunController as FeedRunRest;
@@ -52,7 +51,9 @@ class ServiceProvider implements ServiceProviderInterface {
 			return new PostMapRepository( $wpdb );
 		};
 
-		$c['feed.post_type'] = static fn() => new PostType();
+		$c['migrator'] = static function () use ( $c ): Migrator {
+			return new Migrator( $c['feed.repository'], $c['feed.post_map'] );
+		};
 
 		$c['feed.rest'] = static function () use ( $c ): FeedRest {
 			return new FeedRest(

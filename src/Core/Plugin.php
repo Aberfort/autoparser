@@ -24,8 +24,8 @@ final class Plugin {
 	 */
 	public function init(): void {
 		add_action( 'plugins_loaded', array( $this, 'i18n' ) );
+		add_action( 'plugins_loaded', array( $this->c['migrator'], 'maybe_upgrade' ) );
 		add_action( 'init', array( $this, 'maybe_create_upload_dir' ) );
-		add_action( 'init', array( $this->c['feed.post_type'], 'register' ) );
 
 		/* Register REST controllers */
 		add_action(
@@ -67,7 +67,7 @@ final class Plugin {
 	 * Plugin activation: create tables and schedule active feeds.
 	 */
 	public function activate(): void {
-		$this->c['feed.repository']->create_table();
+		$this->c['migrator']->maybe_upgrade();
 
 		foreach ( $this->c['feed.repository']->all() as $feed ) {
 			if ( $feed->active ) {
