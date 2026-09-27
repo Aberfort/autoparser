@@ -15,7 +15,7 @@ class Scheduler {
 	public function register_hook(): void {
 		add_action(
 			'autoparser_run_feed',
-			[ $this, 'handle' ],
+			array( $this, 'handle' ),
 			10,
 			1
 		);
@@ -26,7 +26,7 @@ class Scheduler {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions(
 				'autoparser_run_feed',
-				[ $feed->id ],
+				array( $feed->id ),
 				'autoparser'
 			);
 		}
@@ -49,7 +49,7 @@ class Scheduler {
 				$firstRun,
 				$interval,
 				'autoparser_run_feed',
-				[ $feed->id ],
+				array( $feed->id ),
 				'autoparser'
 			);
 		}

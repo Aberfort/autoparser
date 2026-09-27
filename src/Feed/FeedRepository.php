@@ -126,8 +126,8 @@ class FeedRepository {
 			selector: $row['selector'],
 			selector_end: $row['selector_end'],
 			limit: (int) $row['limit'],
-            last_ts: isset( $row['last_ts'] ) ? (int) $row['last_ts'] : 0,
-            post_type: $row['post_type'],
+			last_ts: isset( $row['last_ts'] ) ? (int) $row['last_ts'] : 0,
+			post_type: $row['post_type'],
 			author_id: (int) $row['author_id'],
 			categories: (array) json_decode( $row['categories'], true ),
 			prompt: $row['prompt'],
@@ -160,13 +160,13 @@ class FeedRepository {
 		);
 	}
 
-    public function update_last_ts( int $id, int $ts ): void {
-        $this->db->update(
-            $this->table,
-            [ 'last_ts' => $ts ],
-            [ 'id' => $id ],
-            [ '%d' ],
-            [ '%d' ]
-        );
-    }
+	public function update_last_ts( int $id, int $ts ): void {
+		$this->db->update(
+			$this->table,
+			array( 'last_ts' => $ts ),
+			array( 'id' => $id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+	}
 }

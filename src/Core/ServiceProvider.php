@@ -1,7 +1,6 @@
 <?php
 /**
  * Dependency-Injection / Service Provider
- *
  */
 
 namespace AutoParser\Core;
@@ -64,7 +63,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── AI Rewrite (provider-aware) ───────── */
 		$c['ai.rewrite'] = static function () use ( $c ): RewriteService {
-			$settings = get_option( 'autoparser_settings', [] );
+			$settings = get_option( 'autoparser_settings', array() );
 			$default  = $settings['default_ai'] ?? 'gemini';
 
 			$provider = ProviderFactory::make( $default );
@@ -74,7 +73,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ---------- Fixtures (RapidAPI) ---------- */
 		$c['fixtures'] = static function () use ( $c ): \AutoParser\Fixtures\FixturesService {
-			$opts = get_option( 'autoparser_settings', [] );
+			$opts = get_option( 'autoparser_settings', array() );
 
 			return new \AutoParser\Fixtures\FixturesService(
 				apiKey: $opts['fixtures_api_key'] ?? '',
@@ -85,7 +84,7 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── AI Prediction (provider-aware) ───────── */
 		$c['ai.prediction'] = static function () use ( $c ): PredictionService {
-			$settings = get_option( 'autoparser_settings', [] );
+			$settings = get_option( 'autoparser_settings', array() );
 			$default  = $settings['default_ai'] ?? 'gemini';
 
 			$provider = ProviderFactory::make( $default );

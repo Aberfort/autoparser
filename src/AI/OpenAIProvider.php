@@ -15,31 +15,44 @@ class OpenAIProvider implements ProviderInterface {
 
 	public function rewrite( string $text, string $prompt ): string {
 		$chat = OpenAI::client( $this->apiKey )->chat();
-		$resp = $chat->create( [
-			'model'       => $this->model,
-			'messages'    => [
-				[ 'role' => 'system', 'content' => $prompt ],
-				[ 'role' => 'user', 'content' => $text ],
-			],
-			'temperature' => 0.7,
-		] );
+		$resp = $chat->create(
+			array(
+				'model'       => $this->model,
+				'messages'    => array(
+					array(
+						'role'    => 'system',
+						'content' => $prompt,
+					),
+					array(
+						'role'    => 'user',
+						'content' => $text,
+					),
+				),
+				'temperature' => 0.7,
+			)
+		);
 
 		return trim( $resp->choices[0]->message->content );
 	}
 
-	public function forecast( string $prompt, array $extra = [] ): string {
+	public function forecast( string $prompt, array $extra = array() ): string {
 		$chat = OpenAI::client( $this->apiKey )->chat();
-		$resp = $chat->create( [
-			'model'       => $this->model,
-			'messages'    => [
-				[
-					'role'    => 'system',
-					'content' => 'You are an experienced sports analyst.'
-				],
-				[ 'role' => 'user', 'content' => $prompt ],
-			],
-			'temperature' => 0.9,
-		] );
+		$resp = $chat->create(
+			array(
+				'model'       => $this->model,
+				'messages'    => array(
+					array(
+						'role'    => 'system',
+						'content' => 'You are an experienced sports analyst.',
+					),
+					array(
+						'role'    => 'user',
+						'content' => $prompt,
+					),
+				),
+				'temperature' => 0.9,
+			)
+		);
 
 		return trim( $resp->choices[0]->message->content );
 	}

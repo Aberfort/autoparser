@@ -21,18 +21,18 @@ class SettingsController extends WP_REST_Controller {
 		register_rest_route(
 			$this->namespace,
 			"/{$this->rest_base}",
-			[
-				[
+			array(
+				array(
 					'methods'             => 'GET',
-					'callback'            => [ $this, 'get' ],
-					'permission_callback' => [ $this, 'can_manage' ],
-				],
-				[
-					'methods'             => [ 'POST', 'PUT', 'PATCH' ],
-					'callback'            => [ $this, 'save' ],
-					'permission_callback' => [ $this, 'can_manage' ],
-				],
-			]
+					'callback'            => array( $this, 'get' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+				array(
+					'methods'             => array( 'POST', 'PUT', 'PATCH' ),
+					'callback'            => array( $this, 'save' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
 		);
 	}
 
@@ -46,13 +46,13 @@ class SettingsController extends WP_REST_Controller {
 		return rest_ensure_response(
 			get_option(
 				'autoparser_settings',
-				[
+				array(
 					'gemini_api_key'        => '',
 					'openai_api_key'        => '',
 					'global_prompt'         => '',
 					'openai_model'          => '',
 					'enable_fallback_proxy' => false,
-				]
+				)
 			)
 		);
 	}
@@ -60,7 +60,7 @@ class SettingsController extends WP_REST_Controller {
 	/* ====== SAVE (POST|PUT|PATCH) ====== */
 	public function save( WP_REST_Request $r ): \WP_HTTP_Response {
 
-		$opts = get_option( 'autoparser_settings', [] );
+		$opts = get_option( 'autoparser_settings', array() );
 
 		$opts['fixtures_api_key'] = sanitize_text_field( $r->get_param( 'fixtures_api_key' ) ?? '' );
 

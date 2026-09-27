@@ -16,7 +16,7 @@ class FixturesService {
 	private const BASE_URL = 'https://v3.football.api-sports.io';
 
 	/* TOP-ліги: id → пріоритет */
-	private const TOP_LEAGUES = [
+	private const TOP_LEAGUES = array(
 		2   => 1, // UCL – Champions League
 		3   => 2, // UEL – Europa League
 		848 => 3, // UEFA Conference League
@@ -48,7 +48,7 @@ class FixturesService {
 		98  => 29, // Японія J1 League
 		292 => 30, // Південна Корея K-League 1
 
-	];
+	);
 
 	public function __construct(
 		private string $apiKey,
@@ -69,9 +69,9 @@ class FixturesService {
 		$this->log->info( "[Fixtures] Fetch $todayUtc (UTC) → відфільтровуємо $todayLoc ($tzSite->getName())" );
 
 		/* ①  HTTP-запит */
-		$response = $this->get( '/fixtures', [ 'date' => $todayUtc ] );
+		$response = $this->get( '/fixtures', array( 'date' => $todayUtc ) );
 
-		$rows = [];
+		$rows = array();
 		foreach ( $response as $fx ) {
 
 			$leagueId   = (int) ( $fx['league']['id'] ?? 0 );
@@ -90,17 +90,17 @@ class FixturesService {
 				continue;
 			}
 
-			$rows[] = [
+			$rows[] = array(
 				'team1'    => $fx['teams']['home']['name'] ?? '',
 				'team2'    => $fx['teams']['away']['name'] ?? '',
 				'datetime' => $dtLoc->format( 'd.m.Y H:i' ),
 				// 20.05.2025 22:00
 				'league'   => $leagueName,
 				'__prio'   => self::TOP_LEAGUES[ $leagueId ],
-			];
+			);
 		}
 
-		if ( $rows === [] ) {
+		if ( $rows === array() ) {
 			throw new \RuntimeException( 'No fixtures from TOP leagues for today' );
 		}
 
@@ -116,27 +116,27 @@ class FixturesService {
 		/* прибираємо технічне поле */
 
 		return array_map(
-			static fn( $r ) => array_diff_key( $r, [ '__prio' => true ] ),
+			static fn( $r ) => array_diff_key( $r, array( '__prio' => true ) ),
 			$rows
 		);
 	}
 
 	/* ───────────────────────── Low-level GET ───────────────────────── */
 
-	private function get( string $endpoint, array $query = [] ): array {
+	private function get( string $endpoint, array $query = array() ): array {
 
 		$url = self::BASE_URL . $endpoint . '?' . http_build_query( $query );
 
 		try {
 			$resp = $this->http->get(
 				$url,
-				[
-					'headers' => [
+				array(
+					'headers' => array(
 						'x-apisports-key' => $this->apiKey,
 						'Accept'          => 'application/json',
-					],
+					),
 					'timeout' => 15,
-				]
+				)
 			);
 		} catch ( \Throwable $e ) {
 			throw new \RuntimeException( 'HTTP error: ' . $e->getMessage() );

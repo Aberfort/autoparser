@@ -11,7 +11,7 @@ class ProviderFactory {
 	 */
 	public static function make( string $code ): ProviderInterface {
 
-		$opt = get_option( 'autoparser_settings', [] );
+		$opt = get_option( 'autoparser_settings', array() );
 
 		$logger = $GLOBALS['autoparser_logger'];
 

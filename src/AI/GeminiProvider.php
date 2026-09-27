@@ -24,7 +24,7 @@ class GeminiProvider implements ProviderInterface {
 
 		$client = ( new Client( $this->apiKey ) )->withV1BetaVersion();
 		$resp   = $client->generativeModel( $this->model )
-		                 ->generateContent( new TextPart( trim( $prompt . "\n\n" . $text ) ) );
+						->generateContent( new TextPart( trim( $prompt . "\n\n" . $text ) ) );
 
 		$out = trim( $resp->text() );
 		if ( $out === '' ) {
@@ -35,12 +35,12 @@ class GeminiProvider implements ProviderInterface {
 	}
 
 	/** Forecast (html for a single match) */
-	public function forecast( string $prompt, array $extra = [] ): string {
+	public function forecast( string $prompt, array $extra = array() ): string {
 		$this->log->info( '[Gemini] forecast-prompt (' . mb_strlen( $prompt ) . ' chars)' );
 
 		$client = ( new Client( $this->apiKey ) )->withV1BetaVersion();
 		$resp   = $client->generativeModel( $this->model )
-		                 ->generateContent( new TextPart( $prompt ) );
+						->generateContent( new TextPart( $prompt ) );
 
 		$html = trim( $resp->text() );
 		if ( $html === '' ) {

@@ -36,7 +36,7 @@ final class Helpers {
 			return media_sideload_image( $url, 0, null, 'id' );
 		}
 
-		$subdir = '/' . trim( $subdir, '/' );
+		$subdir           = '/' . trim( $subdir, '/' );
 		$redirect_uploads = static function ( array $uploads ) use ( $subdir ): array {
 			$uploads['subdir'] = $subdir;
 			$uploads['path']   = $uploads['basedir'] . $subdir;

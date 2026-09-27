@@ -212,7 +212,7 @@ class FeedController extends WP_REST_Controller {
 	}
 
 	private function from_request( WP_REST_Request $req, ?Feed $feed = null ): Feed {
-		$feed                   ??= new Feed();
+		$feed                 ??= new Feed();
 		$feed->name             = $req->get_param( 'name' ) ?? $feed->name;
 		$feed->url              = $req->get_param( 'url' ) ?? $feed->url;
 		$feed->active           = $req->has_param( 'active' ) ? (bool) $req['active'] : $feed->active;

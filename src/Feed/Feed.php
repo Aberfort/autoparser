@@ -15,7 +15,7 @@ class Feed {
 		public string $status = 'draft',      // 'draft' | 'publish'
 		public ?string $selector = null,    // CSS-селектор
 		public int $limit = 5,            // posts per run
-        public int $last_ts = 0,
+		public int $last_ts = 0,
 		public string $post_type = 'post',
 		public int $author_id = 1,
 		public array $categories = array(),           // term IDs

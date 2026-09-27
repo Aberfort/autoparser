@@ -24,9 +24,10 @@ class Logger {
 
 		/* Назва файлу вигляду  autoparser-2025-05-14.log */
 		$filename = trailingslashit( $dir ) .
-		            'autoparser-' . gmdate( 'Y-m-d' ) . '.log';
+					'autoparser-' . gmdate( 'Y-m-d' ) . '.log';
 
-		/* Ініціалізуємо Monolog. Формат "час | РІВЕНЬ | повідомлення" —
+		/*
+		Ініціалізуємо Monolog. Формат "час | РІВЕНЬ | повідомлення" —
 		 * саме його очікує LogController::get_items() при розборі файлу. */
 		$formatter = new LineFormatter( "%datetime% | %level_name% | %message%\n", 'Y-m-d H:i:s', true, true );
 
@@ -39,15 +40,15 @@ class Logger {
 
 	/* ───────── API ───────── */
 
-	public function info( string $message, array $context = [] ): void {
+	public function info( string $message, array $context = array() ): void {
 		$this->logger->info( $message, $context );
 	}
 
-	public function warning( string $message, array $context = [] ): void {
+	public function warning( string $message, array $context = array() ): void {
 		$this->logger->warning( $message, $context );
 	}
 
-	public function error( string $message, array $context = [] ): void {
+	public function error( string $message, array $context = array() ): void {
 		$this->logger->error( $message, $context );
 	}
 }
