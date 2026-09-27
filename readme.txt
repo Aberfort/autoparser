@@ -1,5 +1,5 @@
 === Autoparser ===
-Contributors: TODO-впишіть-свій-wp.org-username
+Contributors: serhiivasyliev
 Tags: rss, autoblog, ai, content, gemini
 Requires at least: 6.5
 Tested up to: 7.1
