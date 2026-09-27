@@ -2,7 +2,7 @@
 Contributors: TODO-впишіть-свій-wp.org-username
 Tags: rss, autoblog, ai, content, gemini
 Requires at least: 6.5
-Tested up to: TODO-впишіть-версію-після-реального-тестування
+Tested up to: 7.1
 Requires PHP: 8.2
 Stable tag: 0.1.10
 License: GPLv2 or later

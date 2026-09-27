@@ -19,8 +19,8 @@ phpunit.xml
 phpunit.xml.dist
 .phpcs.xml
 .phpcs.xml.dist
+phpcs.xml.dist
 
-info.json
 README.md
 build.sh
 bin
