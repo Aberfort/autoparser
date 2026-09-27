@@ -22,10 +22,6 @@ define( 'AUTOPARSER_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AUTOPARSER_URL', plugin_dir_url( __FILE__ ) );
 define( 'AUTOPARSER_VERSION', '0.1.10' );
 
-if ( file_exists( __DIR__ . '/src/Helpers/plugin-update.php' ) ) {
-	require_once __DIR__ . '/src/Helpers/plugin-update.php';
-}
-
 /*
  * Composer autoloader.
  */
