@@ -281,6 +281,10 @@ class FeedController extends WP_REST_Controller {
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_key',
 			),
+			'language'         => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
 		);
 	}
 
@@ -306,6 +310,7 @@ class FeedController extends WP_REST_Controller {
 		$feed->image_dir        = $req->get_param( 'image_dir' ) ?? $feed->image_dir;
 		$feed->predict_only     = $req->has_param( 'predict_only' ) ? (bool) $req['predict_only'] : $feed->predict_only;
 		$feed->ai_provider      = $req->get_param( 'ai_provider' ) ?? $feed->ai_provider;
+		$feed->language         = $req->get_param( 'language' ) ?? $feed->language;
 
 		return $feed;
 	}
@@ -338,6 +343,7 @@ class FeedController extends WP_REST_Controller {
 			'last_msg'         => $f->last_msg,
 			'predict_only'     => $f->predict_only,
 			'ai_provider'      => $f->ai_provider,
+			'language'         => $f->language,
 		);
 	}
 }

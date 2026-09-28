@@ -32,7 +32,7 @@ define( 'AUTOPARSER_VERSION', '0.1.10' );
  * CREATE TABLE SQL changes, so Migrator re-runs dbDelta() on existing
  * installs. See src/Core/Migrator.php.
  */
-define( 'AUTOPARSER_DB_VERSION', '1' );
+define( 'AUTOPARSER_DB_VERSION', '2' );
 
 /*
  * Composer autoloader.

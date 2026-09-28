@@ -53,6 +53,9 @@ final class Plugin {
 		/* OPML export */
 		$this->c['opml.handler']->register();
 
+		/* WPML/Polylang sync */
+		$this->c['multilingual.sync']->register();
+
 		/* Scheduler hook */
 		$this->c['cron.scheduler']->register_hook();
 

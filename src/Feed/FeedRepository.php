@@ -50,6 +50,7 @@ class FeedRepository {
  			last_msg    TEXT NULL,
  			predict_only  TINYINT(1) NOT NULL DEFAULT 0,
  			ai_provider    VARCHAR(20) NOT NULL DEFAULT 'gemini',
+ 			language      VARCHAR(10) NOT NULL DEFAULT '',
  			created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
@@ -97,6 +98,7 @@ class FeedRepository {
 			'image_dir'        => $feed->image_dir,
 			'predict_only'     => (int) $feed->predict_only,
 			'ai_provider'      => $feed->ai_provider,
+			'language'         => $feed->language,
 		);
 
 		if ( $feed->id ) {
@@ -145,6 +147,7 @@ class FeedRepository {
 			last_msg: $row['last_msg'] ?? '',
 			predict_only: (bool) $row['predict_only'],
 			ai_provider: $row['ai_provider'] ?? 'gemini',
+			language: $row['language'] ?? '',
 		);
 	}
 

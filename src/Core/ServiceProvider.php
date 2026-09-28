@@ -12,6 +12,7 @@ use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
 use AutoParser\Admin\Controller as AdminController;
 use AutoParser\Admin\OpmlHandler;
+use AutoParser\Integrations\MultilingualSync;
 use AutoParser\Admin\REST\FeedController as FeedRest;
 use AutoParser\Admin\REST\FeedRunController as FeedRunRest;
 use AutoParser\Admin\REST\LogController;
@@ -141,6 +142,9 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── OPML export (admin-post, not REST) ───────── */
 		$c['opml.handler'] = static fn() => new OpmlHandler( $c['feed.repository'] );
+
+		/* ───────── WPML/Polylang sync (no-op if neither is active) ───────── */
+		$c['multilingual.sync'] = static fn() => new MultilingualSync();
 
 		/* ───────── REST: Logs & Settings ───────── */
 		$c['log.rest']      = static fn() => new LogController( WP_CONTENT_DIR . '/uploads/autoparser/logs' );

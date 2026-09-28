@@ -152,6 +152,7 @@ export default function FeedFormShared({
                 meta_title: '', meta_description: '',
                 predict_only: false,
                 ai_provider: 'gemini',
+                language: '',
             });
             return;
         }
@@ -169,6 +170,7 @@ export default function FeedFormShared({
                 post_time: d.post_time ?? '08:00',
                 predict_only: d.predict_only ?? false,
                 ai_provider: d.ai_provider ?? 'gemini',
+                language: d.language ?? '',
             }));
         return () => {
             alive = false;
@@ -398,6 +400,20 @@ export default function FeedFormShared({
                                 value={form.post_time}
                                 onChange={e => update('post_time', e.target.value)}
                             />
+                        </label>
+
+                        <label className="autoparser-label">
+                            {__('Мова (WPML/Polylang)', 'autoparser')}
+                            <input
+                                className="autoparser-input"
+                                placeholder="uk, en, ru…"
+                                maxLength={10}
+                                value={form.language}
+                                onChange={e => update('language', e.target.value.trim().toLowerCase())}
+                            />
+                            <small className="autoparser-help text-gray-500">
+                                {__('Необов\'язково. Якщо вказано і активний WPML або Polylang, опублікований допис отримає цю мову.', 'autoparser')}
+                            </small>
                         </label>
                     </fieldset>
 

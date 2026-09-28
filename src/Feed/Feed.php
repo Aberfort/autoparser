@@ -34,7 +34,8 @@ class Feed {
 		public string $post_time = '08:00',
 		public bool $predict_only = false,
 		public string $ai_provider = 'gemini',
-		public ?string $selector_end = null
+		public ?string $selector_end = null,
+		public string $language = ''    // ISO 639-1 code (e.g. 'uk'); '' = don't set (WPML/Polylang)
 	) {
 	}
 }
