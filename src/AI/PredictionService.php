@@ -1,8 +1,8 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
-use ScAutoParser\AI\Contract\ProviderInterface;
+use AutoParser\AI\Contract\ProviderInterface;
 
 class PredictionService {
 
@@ -11,7 +11,7 @@ class PredictionService {
 	) {
 	}
 
-	public function getForecast( string $prompt, array $vars = [] ): string {
+	public function get_forecast( string $prompt, array $vars = array() ): string {
 		$filled = strtr( $prompt, $vars );
 
 		return $this->provider->forecast( $filled, $vars );

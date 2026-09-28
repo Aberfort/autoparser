@@ -1,9 +1,9 @@
 <?php
 
-namespace ScAutoParser\Cron;
+namespace AutoParser\Cron;
 
-use ScAutoParser\Feed\Feed;
-use ScAutoParser\Parser\ParserService;
+use AutoParser\Feed\Feed;
+use AutoParser\Parser\ParserService;
 
 class Scheduler {
 
@@ -14,8 +14,8 @@ class Scheduler {
 
 	public function register_hook(): void {
 		add_action(
-			'sc_autoparser_run_feed',
-			[ $this, 'handle' ],
+			'autoparser_run_feed',
+			array( $this, 'handle' ),
 			10,
 			1
 		);
@@ -25,9 +25,9 @@ class Scheduler {
 
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
 			as_unschedule_all_actions(
-				'sc_autoparser_run_feed',
-				[ $feed->id ],
-				'sc-autoparser'
+				'autoparser_run_feed',
+				array( $feed->id ),
+				'autoparser'
 			);
 		}
 
@@ -35,22 +35,22 @@ class Scheduler {
 			return;
 		}
 
-		$timeParts = explode( ':', $feed->post_time );
-		$firstRun  = mktime( (int) $timeParts[0], (int) $timeParts[1], 0 );
+		$time_parts = explode( ':', $feed->post_time );
+		$first_run  = mktime( (int) $time_parts[0], (int) $time_parts[1], 0 );
 
-		if ( $firstRun <= time() ) {
-			$firstRun += DAY_IN_SECONDS;
+		if ( $first_run <= time() ) {
+			$first_run += DAY_IN_SECONDS;
 		}
 
 		$interval = DAY_IN_SECONDS;
 
 		if ( function_exists( 'as_schedule_recurring_action' ) ) {
 			as_schedule_recurring_action(
-				$firstRun,
+				$first_run,
 				$interval,
-				'sc_autoparser_run_feed',
-				[ $feed->id ],
-				'sc-autoparser'
+				'autoparser_run_feed',
+				array( $feed->id ),
+				'autoparser'
 			);
 		}
 	}

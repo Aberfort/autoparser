@@ -1,8 +1,8 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
-use ScAutoParser\AI\Contract\ProviderInterface;
+use AutoParser\AI\Contract\ProviderInterface;
 
 class ProviderFactory {
 
@@ -11,11 +11,11 @@ class ProviderFactory {
 	 */
 	public static function make( string $code ): ProviderInterface {
 
-		$opt = get_option( 'scap_settings', [] );
+		$opt = get_option( 'autoparser_settings', array() );
 
-		$logger = $GLOBALS['scap_logger'];
+		$logger = $GLOBALS['autoparser_logger'];
 
-		return match ( $code ) {
+		$provider = match ( $code ) {
 
 			/* ---------- OpenAI GPT ---------- */
 			'openai' => new OpenAIProvider(
@@ -30,5 +30,15 @@ class ProviderFactory {
 				$opt['gemini_model'] ?? 'gemini-2.0-flash'
 			),
 		};
+
+		/**
+		 * Filters the AI provider instance, letting third-party code
+		 * register providers beyond the built-in Gemini/OpenAI ones.
+		 *
+		 * @param ProviderInterface $provider The provider that would be used.
+		 * @param string            $code     The requested provider code.
+		 * @param array             $settings The plugin's `autoparser_settings` option.
+		 */
+		return apply_filters( 'autoparser_ai_provider', $provider, $code, $opt );
 	}
 }

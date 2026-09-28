@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\AI\Contract;
+namespace AutoParser\AI\Contract;
 
 /**
  * Generic AI provider (Gemini, OpenAI, …)
@@ -8,5 +8,5 @@ namespace ScAutoParser\AI\Contract;
 interface ProviderInterface {
 	public function rewrite( string $text, string $prompt ): string;
 
-	public function forecast( string $prompt, array $extra = [] ): string;
+	public function forecast( string $prompt, array $extra = array() ): string;
 }

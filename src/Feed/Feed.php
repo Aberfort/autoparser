@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
 /**
  * Value-object that represents a single Feed entity.
@@ -15,7 +15,7 @@ class Feed {
 		public string $status = 'draft',      // 'draft' | 'publish'
 		public ?string $selector = null,    // CSS-селектор
 		public int $limit = 5,            // posts per run
-        public int $last_ts = 0,
+		public int $last_ts = 0,
 		public string $post_type = 'post',
 		public int $author_id = 1,
 		public array $categories = array(),           // term IDs
@@ -23,7 +23,7 @@ class Feed {
 		public string $detail_prompt = '',
 		public string $thumbnail_mode = 'first', // 'first' | 'manual'
 		public ?int $thumbnail_id = null,
-		public string $image_dir = '/sc-autoparser',
+		public string $image_dir = '/autoparser',
 		public ?string $created_at = null,
 		public ?string $updated_at = null,
 		public string $last_status = 'never',
@@ -34,7 +34,8 @@ class Feed {
 		public string $post_time = '08:00',
 		public bool $predict_only = false,
 		public string $ai_provider = 'gemini',
-		public ?string $selector_end = null
+		public ?string $selector_end = null,
+		public string $language = ''    // ISO 639-1 code (e.g. 'uk'); '' = don't set (WPML/Polylang)
 	) {
 	}
 }

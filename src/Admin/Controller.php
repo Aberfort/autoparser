@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Admin;
+namespace AutoParser\Admin;
 
 /**
  * Рендер адмін-сторінок та підключення React-бандла.
@@ -17,61 +17,40 @@ class Controller {
 
 	public function menu(): void {
 
-		// Головна сторінка — список лент
 		add_menu_page(
-			'SC Autoparser',
-			'SC Autoparser',
+			__( 'Autoparser', 'autoparser' ),
+			__( 'Autoparser', 'autoparser' ),
 			'manage_options',
-			'sc-autoparser',
-			array( $this, 'render_list' ),
+			'autoparser',
+			array( $this, 'render_feeds' ),
 			'dashicons-rss',
 			65
 		);
 
-		// Окрема сторінка «Додати ленту» (можна відкривати напряму)
 		add_submenu_page(
-			'sc-autoparser',
-			'Додати ленту',
-			'Додати ленту',
+			'autoparser',
+			__( 'Ленти', 'autoparser' ),
+			__( 'Ленти', 'autoparser' ),
 			'manage_options',
-			'sc-autoparser-add',
-			array( $this, 'render_add' )
+			'autoparser',
+			array( $this, 'render_feeds' )
 		);
 
 		add_submenu_page(
-			null,
-			'Редагувати ленту',
-			'Редагувати ленту',
+			'autoparser',
+			__( 'Активність', 'autoparser' ),
+			__( 'Активність', 'autoparser' ),
 			'manage_options',
-			'sc-autoparser-edit',
-			array( $this, 'render_edit' )
+			'autoparser-activity',
+			array( $this, 'render_activity' )
 		);
 
 		add_submenu_page(
-			'sc-autoparser',
-			'Журнал',
-			'Журнал',
+			'autoparser',
+			__( 'Налаштування', 'autoparser' ),
+			__( 'Налаштування', 'autoparser' ),
 			'manage_options',
-			'sc-autoparser-log',
-			array( $this, 'render_log' )
-		);
-
-		add_submenu_page(
-			'sc-autoparser',
-			'Розклад',
-			'Розклад',
-			'manage_options',
-			'sc-autoparser-cron',
-			fn() => $this->wrapper( 'scap-root-cron' )
-		);
-
-		// Сторінка налаштувань
-		add_submenu_page(
-			'sc-autoparser',
-			'Налаштування',
-			'Налаштування',
-			'manage_options',
-			'sc-autoparser-settings',
+			'autoparser-settings',
 			array( $this, 'render_settings' )
 		);
 	}
@@ -83,69 +62,80 @@ class Controller {
 	 */
 	public function enqueue( string $hook ): void {
 
-		if ( ! str_starts_with( $hook, 'toplevel_page_sc-autoparser' )
-			&& ! str_contains( $hook, 'sc-autoparser-' ) ) {
+		if ( ! str_starts_with( $hook, 'toplevel_page_autoparser' )
+			&& ! str_contains( $hook, 'autoparser-' ) ) {
 			return;
 		}
 
-		$asset = include SC_AUTOPARSER_DIR . 'assets/build/index.asset.php';
+		$asset = include AUTOPARSER_DIR . 'assets/build/index.asset.php';
 
 		wp_enqueue_style(
-			'sc-autoparser-admin',
-			SC_AUTOPARSER_URL . 'assets/build/style-style.scss.css',
+			'autoparser-admin',
+			AUTOPARSER_URL . 'assets/build/style-style.scss.css',
 			array( 'wp-components' ),
 			$this->version
 		);
 
 		wp_enqueue_script(
-			'sc-autoparser-admin',
-			SC_AUTOPARSER_URL . 'assets/build/index.js',
+			'autoparser-admin',
+			AUTOPARSER_URL . 'assets/build/index.js',
 			$asset['dependencies'],
 			$asset['version'],
 			true
 		);
 
 		wp_localize_script(
-			'sc-autoparser-admin',
-			'scapAjax',
+			'autoparser-admin',
+			'autoparserOpml',
 			array(
-				'url'   => admin_url( 'admin-ajax.php' ),
-				'nonce' => wp_create_nonce( 'wp_rest' ),
+				'exportUrl' => wp_nonce_url(
+					admin_url( 'admin-post.php?action=' . OpmlHandler::ACTION ),
+					OpmlHandler::ACTION
+				),
 			)
-		);
-
-		wp_localize_script(
-			'sc-autoparser-admin',
-			'scapSettings',
-			get_option( 'scap_settings', array() )
 		);
 	}
 
 	/* ---------- RENDERS ---------- */
 
 	private function wrapper( string $id ): void {
-		echo '<div class="wrap"><h1 class="wp-heading-inline">SC Autoparser</h1><hr class="wp-header-end">';
+		echo '<div class="wrap"><h1 class="wp-heading-inline">Autoparser</h1><hr class="wp-header-end">';
 		printf( '<div id="%s"></div>', esc_attr( $id ) );
 		echo '</div>';
 	}
 
-	public function render_list(): void {
-		$this->wrapper( 'scap-root-list' );
+	public function render_feeds(): void {
+		$this->wrapper( 'autoparser-root-feeds' );
 	}
 
-	public function render_add(): void {
-		$this->wrapper( 'scap-root-add' );
+	public function render_activity(): void {
+		$this->wrapper( 'autoparser-root-activity' );
 	}
 
 	public function render_settings(): void {
-		$this->wrapper( 'scap-root-settings' );
+		$this->wrapper( 'autoparser-root-settings' );
 	}
 
-	public function render_edit(): void {
-		$this->wrapper( 'scap-root-edit' );
-	}
+	/**
+	 * Dismissible notice on the plugin's own screens when no AI provider
+	 * key is configured yet — rewrite will fail on the first run otherwise.
+	 */
+	public function maybe_missing_api_key_notice(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || ! str_contains( $screen->id, 'autoparser' ) ) {
+			return;
+		}
 
-	public function render_log(): void {
-		$this->wrapper( 'scap-root-log' );
+		$opts = get_option( 'autoparser_settings', array() );
+		if ( ! empty( $opts['gemini_api_key'] ) || ! empty( $opts['openai_api_key'] ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Щоб рерайт статей працював, додайте ключ Gemini або OpenAI.', 'autoparser' ),
+			esc_url( admin_url( 'admin.php?page=autoparser-settings' ) ),
+			esc_html__( 'Перейти в налаштування', 'autoparser' )
+		);
 	}
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace ScAutoParser\AI;
+namespace AutoParser\AI;
 
-use ScAutoParser\AI\Contract\ProviderInterface;
+use AutoParser\AI\Contract\ProviderInterface;
 
 class RewriteService {
 	public function __construct( private ProviderInterface $provider ) { }

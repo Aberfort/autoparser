@@ -2,28 +2,19 @@
  * Entry bootstrap — mounts React components into WP pages
  */
 import {createRoot} from 'react-dom/client';
-import FeedList from './components/FeedList';
-import FeedFormStandalone from './components/FeedFormStandalone';
-import FeedFormEdit from './components/FeedFormEdit';
+import FeedsScreen from './components/FeedsScreen';
+import ActivityScreen from './components/ActivityScreen';
 import Settings from './components/Settings';
-import LogTable from './components/LogTable';
-import CronTable from './components/CronTable';
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('[id^="scap-root-"]')) {
-        document.body.classList.add('scap-admin');
+    if (document.querySelector('[id^="autoparser-root-"]')) {
+        document.body.classList.add('autoparser-admin');
     }
 
-    const qs = new URLSearchParams(window.location.search);
-    const feedId = qs.get('feed');
-
     const mounts = {
-        'scap-root-list': <FeedList/>,
-        'scap-root-add': <FeedFormStandalone/>,
-        'scap-root-edit': <FeedFormEdit feedId={feedId}/>,
-        'scap-root-settings': <Settings/>,
-        'scap-root-log': <LogTable/>,
-        'scap-root-cron': <CronTable/>,
+        'autoparser-root-feeds': <FeedsScreen/>,
+        'autoparser-root-activity': <ActivityScreen/>,
+        'autoparser-root-settings': <Settings/>,
     };
 
     Object.entries(mounts).forEach(([id, node]) => {

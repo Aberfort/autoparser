@@ -10,17 +10,17 @@ import {__} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {motion} from 'framer-motion';
 
-const ENDPOINT = '/sc-autoparser/v1/feeds';
+const ENDPOINT = '/autoparser/v1/feeds';
 
 /* режими мініатюри */
 const THUMBNAIL_MODES = [
     {
         value: 'first',
-        label: __('Використати перше зображення', 'sc-autoparser')
+        label: __('Використати перше зображення', 'autoparser')
     },
     {
         value: 'manual',
-        label: __('Ручне завантаження (нічого не додається)', 'sc-autoparser')
+        label: __('Ручне завантаження (нічого не додається)', 'autoparser')
     },
 ];
 
@@ -32,8 +32,10 @@ const AIPostBadge = () => (
 );
 
 export default function FeedFormShared({
-                                           feedId = null, onSuccess = () => {
-    }
+                                           feedId = null,
+                                           onSuccess = () => {
+                                           },
+                                           onBack = null,
                                        }) {
 
     /* ───────── state ───────── */
@@ -46,7 +48,29 @@ export default function FeedFormShared({
     const [saved, setSaved] = useState(false);
     const [running, setRun] = useState(false);
 
+    const [preview, setPreview] = useState(null);
+    const [previewError, setPreviewError] = useState(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+
     const update = (k, v) => setForm(prev => ({...prev, [k]: v}));
+
+    const testSelector = () => {
+        setPreviewLoading(true);
+        setPreviewError(null);
+        setPreview(null);
+        apiFetch({
+            path: '/autoparser/v1/feeds/preview',
+            method: 'POST',
+            data: {
+                url: form.url,
+                selector: form.selector,
+                selector_end: form.selector_end,
+            },
+        })
+            .then(setPreview)
+            .catch(err => setPreviewError(err.message || __('Не вдалося отримати вміст за цим URL/селектором.', 'autoparser')))
+            .finally(() => setPreviewLoading(false));
+    };
 
     /* ───────── load options ───────── */
     useEffect(() => {
@@ -60,11 +84,11 @@ export default function FeedFormShared({
                 .map(([slug, info]) => ({value: slug, label: info.name})))
             .then(arr => setTypes(arr.length ? arr : [{
                 value: 'post',
-                label: __('Пости', 'sc-autoparser')
+                label: __('Пости', 'autoparser')
             }]))
             .catch(() => setTypes([{
                 value: 'post',
-                label: __('Пости', 'sc-autoparser')
+                label: __('Пости', 'autoparser')
             }]));
 
         /* Authors */
@@ -128,6 +152,7 @@ export default function FeedFormShared({
                 meta_title: '', meta_description: '',
                 predict_only: false,
                 ai_provider: 'gemini',
+                language: '',
             });
             return;
         }
@@ -145,6 +170,7 @@ export default function FeedFormShared({
                 post_time: d.post_time ?? '08:00',
                 predict_only: d.predict_only ?? false,
                 ai_provider: d.ai_provider ?? 'gemini',
+                language: d.language ?? '',
             }));
         return () => {
             alive = false;
@@ -164,7 +190,7 @@ export default function FeedFormShared({
         })
             .then(() => {
                 setSaved(true);
-                onSuccess();
+                setTimeout(onSuccess, 700);
             })
             .finally(() => setSaving(false));
     };
@@ -186,45 +212,52 @@ export default function FeedFormShared({
             opacity: 1,
             y: 0
         }} className="mx-auto">
-            <div className="scap-card overflow-hidden">
+            <div className="autoparser-card overflow-hidden">
 
                 {/* header */}
-                <header className="scap-card__head">
-                    <h2 className="text-2xl font-semibold tracking-wide">
-                        {feedId ? __('Редагування ленти', 'sc-autoparser') : __('Нова лента', 'sc-autoparser')}
-                        {feedId && ` #${feedId}`}
-                    </h2>
+                <header className="autoparser-card__head">
+                    <div className="flex items-center gap-4">
+                        {onBack && (
+                            <Button className="autoparser-btn autoparser-btn--secondary" onClick={onBack}>
+                                {__('← Назад до списку', 'autoparser')}
+                            </Button>
+                        )}
+                        <h2 className="text-2xl font-semibold tracking-wide">
+                            {feedId ? __('Редагування ленти', 'autoparser') : __('Нова лента', 'autoparser')}
+                            {feedId && ` #${feedId}`}
+                        </h2>
+                    </div>
 
                     {feedId &&
-                        <Tooltip text={__('Запустити зараз', 'sc-autoparser')}>
-                            <Button className="scap-btn" disabled={running} onClick={runNow}>
+                        <Tooltip text={__('Запустити зараз', 'autoparser')}>
+                            <Button className="autoparser-btn" disabled={running} onClick={runNow}>
                                 {running ?
-                                    <Spinner/> : __('Запуск', 'sc-autoparser')}
+                                    <Spinner/> : __('Запуск', 'autoparser')}
                             </Button>
                         </Tooltip>
                     }
                 </header>
 
                 {/* form */}
-                <form className="p-10 scap-form" onSubmit={e => {
+                <form className="p-10 autoparser-form" onSubmit={e => {
                     e.preventDefault();
                     save();
                 }}>
 
                     {saved &&
                         <Notice status="success" isDismissible onRemove={() => setSaved(false)}>
-                            {__('Збережено!', 'sc-autoparser')}
+                            {__('Збережено!', 'autoparser')}
                         </Notice>
                     }
 
                     {/* ======= LEFT ======= */}
-                    <fieldset className="scap-fieldset">
-                        <legend>{__('Основні', 'sc-autoparser')}</legend>
+                    <fieldset className="autoparser-fieldset">
+                        <legend>{__('Основні', 'autoparser')}</legend>
 
-                        <label className="scap-label">
+                        <label className="autoparser-label">
                             AI Engine
                             <select
-                                className="scap-select"
+                                className="autoparser-select"
                                 value={form.ai_provider}
                                 onChange={e => update('ai_provider', e.target.value)}
                             >
@@ -234,17 +267,17 @@ export default function FeedFormShared({
                         </label>
 
                         {/* Name */}
-                        <label className="scap-label">
-                            {__('Назва', 'sc-autoparser')}
-                            <input className="scap-input" value={form.name} onChange={e => update('name', e.target.value)}/>
+                        <label className="autoparser-label">
+                            {__('Назва', 'autoparser')}
+                            <input className="autoparser-input" value={form.name} onChange={e => update('name', e.target.value)}/>
                         </label>
 
                         {/* URL */}
-                        <label className="scap-label">
+                        <label className="autoparser-label">
                             URL (RSS / API)
                             {!form.url && <AIPostBadge/>}
                             <input
-                                className="scap-input"
+                                className="autoparser-input"
                                 type="url"
                                 placeholder="https://..."
                                 value={form.url}
@@ -252,49 +285,80 @@ export default function FeedFormShared({
                             />
                         </label>
 
-                        <label className="scap-label">
+                        <label className="autoparser-label">
                             Фільтрувати лише прогнози
                             <input
                                 type="checkbox"
                                 checked={form.predict_only}
                                 onChange={e => update('predict_only', e.target.checked)}
                             />
+                            <small className="autoparser-help text-gray-500">
+                                {__('Потребує увімкненого модуля AI-прогнозів у Налаштуваннях.', 'autoparser')}
+                            </small>
                         </label>
 
                         {/* CSS-selector (прихований, якщо AI-постинг) */}
                         {form.url &&
-                            <label className="scap-label">
+                            <label className="autoparser-label">
                                 CSS-селектори (start/end)
-                                <input className="scap-input" value={form.selector} onChange={e => update('selector', e.target.value)}/>
-                                <input className="scap-input" value={form.selector_end} onChange={e => update('selector_end', e.target.value)}/>
+                                <input className="autoparser-input" value={form.selector} onChange={e => update('selector', e.target.value)}/>
+                                <input className="autoparser-input" value={form.selector_end} onChange={e => update('selector_end', e.target.value)}/>
+                                <small className="autoparser-help text-gray-500">
+                                    {__('Необов\'язково — якщо селектор порожній або не знайдений, плагін спробує типові варіанти (article, main, .entry-content…) автоматично.', 'autoparser')}
+                                </small>
+
+                                <Button
+                                    type="button"
+                                    className="autoparser-btn autoparser-btn--secondary"
+                                    disabled={!form.url || previewLoading}
+                                    onClick={testSelector}
+                                >
+                                    {previewLoading ? <Spinner/> : __('Перевірити селектор', 'autoparser')}
+                                </Button>
+
+                                {previewError && (
+                                    <Notice status="error" isDismissible onRemove={() => setPreviewError(null)}>
+                                        {previewError}
+                                    </Notice>
+                                )}
+
+                                {preview && (
+                                    <div className="autoparser-card p-4 space-y-2">
+                                        <p><strong>{__('Заголовок', 'autoparser')}:</strong> {preview.title || '—'}</p>
+                                        <p><strong>{__('Довжина контенту', 'autoparser')}:</strong> {preview.content_length} {__('символів', 'autoparser')}</p>
+                                        <p className="autoparser-help text-gray-500 max-h-40 overflow-auto">
+                                            {preview.content_excerpt}
+                                        </p>
+                                    </div>
+                                )}
                             </label>
                         }
 
                         {/* CPT */}
-                        <label className="scap-label">
-                            {__('Тип запису', 'sc-autoparser')}
-                            <select className="scap-select" value={form.post_type} onChange={e => update('post_type', e.target.value)}>
+                        <label className="autoparser-label">
+                            {__('Тип запису', 'autoparser')}
+                            <select className="autoparser-select" value={form.post_type} onChange={e => update('post_type', e.target.value)}>
                                 {types.map(o =>
                                     <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </label>
 
                         {/* Author */}
-                        <label className="scap-label">
-                            {__('Автор', 'sc-autoparser')}
-                            <select className="scap-select" value={form.author_id} onChange={e => update('author_id', Number(e.target.value))}>
+                        <label className="autoparser-label">
+                            {__('Автор', 'autoparser')}
+                            <select className="autoparser-select" value={form.author_id} onChange={e => update('author_id', Number(e.target.value))}>
                                 {authors.map(a =>
                                     <option key={a.value} value={a.value}>{a.label}</option>)}
                             </select>
                         </label>
 
                         {/* Categories */}
-                        <label className="scap-label">
-                            {__('Категорії', 'sc-autoparser')}
+                        <label className="autoparser-label">
+                            {__('Категорії', 'autoparser')}
                             <select
                                 multiple
                                 size="6"
-                                className="scap-select h-36"
+                                className="autoparser-select h-36"
                                 value={form.categories.map(String)}
                                 onChange={e => update(
                                     'categories',
@@ -307,10 +371,10 @@ export default function FeedFormShared({
                         </label>
 
                         {/* Limit */}
-                        <label className="scap-label">
-                            {__('Ліміт постів (RSS) / прогнозів', 'sc-autoparser')}
+                        <label className="autoparser-label">
+                            {__('Ліміт постів (RSS) / прогнозів', 'autoparser')}
                             <input
-                                className="scap-input"
+                                className="autoparser-input"
                                 type="number"
                                 min="1"
                                 value={form.limit}
@@ -320,42 +384,56 @@ export default function FeedFormShared({
 
                         {/* Active flag */}
                         <div className="flex items-center gap-4">
-                            <span className="scap-label mb-0">{__('Активна', 'sc-autoparser')}</span>
-                            <label className="scap-toggle">
+                            <span className="autoparser-label mb-0">{__('Активна', 'autoparser')}</span>
+                            <label className="autoparser-toggle">
                                 <input type="checkbox" checked={form.active} onChange={e => update('active', e.target.checked)}/>
                                 <span></span>
                             </label>
                         </div>
 
                         {/* Post time */}
-                        <label className="scap-label">
-                            {__('Час автопостингу', 'sc-autoparser')}
+                        <label className="autoparser-label">
+                            {__('Час автопостингу', 'autoparser')}
                             <input
-                                className="scap-input"
+                                className="autoparser-input"
                                 type="time"
                                 value={form.post_time}
                                 onChange={e => update('post_time', e.target.value)}
                             />
                         </label>
+
+                        <label className="autoparser-label">
+                            {__('Мова (WPML/Polylang)', 'autoparser')}
+                            <input
+                                className="autoparser-input"
+                                placeholder="uk, en, ru…"
+                                maxLength={10}
+                                value={form.language}
+                                onChange={e => update('language', e.target.value.trim().toLowerCase())}
+                            />
+                            <small className="autoparser-help text-gray-500">
+                                {__('Необов\'язково. Якщо вказано і активний WPML або Polylang, опублікований допис отримає цю мову.', 'autoparser')}
+                            </small>
+                        </label>
                     </fieldset>
 
                     {/* ======= RIGHT ======= */}
-                    <fieldset className="scap-fieldset">
-                        <legend>{__('Додатково', 'sc-autoparser')}</legend>
+                    <fieldset className="autoparser-fieldset">
+                        <legend>{__('Додатково', 'autoparser')}</legend>
 
                         {!form.url && (
                             <>
-                                <label className="scap-label">
-                                    {__('Детальний прогноз', 'sc-autoparser')}
+                                <label className="autoparser-label">
+                                    {__('Детальний прогноз', 'autoparser')}
                                     <textarea
-                                        className="scap-textarea"
+                                        className="autoparser-textarea"
                                         rows="10"
                                         value={form.detail_prompt}
                                         onChange={e => update('detail_prompt', e.target.value)}
                                         placeholder="Напиши профессиональный прогноз на матч..."
                                     />
-                                    <small className="scap-help text-gray-500">
-                                        {__('Доступні змінні', 'sc-autoparser')}:{' '}
+                                    <small className="autoparser-help text-gray-500">
+                                        {__('Доступні змінні', 'autoparser')}:{' '}
                                         <code>{'{{team1}}'}</code>,
                                         <code>{'{{team2}}'}</code>,
                                         <code>{'{{time}}'}</code>,
@@ -368,38 +446,38 @@ export default function FeedFormShared({
 
                         {form.url && (
                             <>
-                                <label className="scap-label">
-                                    {__('Локальний шаблон промпту', 'sc-autoparser')}
+                                <label className="autoparser-label">
+                                    {__('Локальний шаблон промпту', 'autoparser')}
                                     <textarea
-                                        className="scap-textarea"
+                                        className="autoparser-textarea"
                                         rows="8"
                                         value={form.prompt}
                                         onChange={e => update('prompt', e.target.value)}
                                     />
-                                    <small className="scap-help text-gray-500">
-                                        {__('Рядок до “---” використовується для заголовка, після “---” — для контенту.', 'sc-autoparser')}
+                                    <small className="autoparser-help text-gray-500">
+                                        {__('Рядок до “---” використовується для заголовка, після “---” — для контенту.', 'autoparser')}
                                     </small>
                                 </label>
                             </>
                         )}
-                        <label className="scap-label">
-                            {__('Режим мініатюри', 'sc-autoparser')}
-                            <select className="scap-select" value={form.thumbnail_mode} onChange={e => update('thumbnail_mode', e.target.value)}>
+                        <label className="autoparser-label">
+                            {__('Режим мініатюри', 'autoparser')}
+                            <select className="autoparser-select" value={form.thumbnail_mode} onChange={e => update('thumbnail_mode', e.target.value)}>
                                 {THUMBNAIL_MODES.map(o =>
                                     <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                         </label>
 
                         {/* Meta */}
-                        <label className="scap-label">
+                        <label className="autoparser-label">
                             Meta Title
-                            <input className="scap-input" value={form.meta_title} onChange={e => update('meta_title', e.target.value)}/>
+                            <input className="autoparser-input" value={form.meta_title} onChange={e => update('meta_title', e.target.value)}/>
                         </label>
 
-                        <label className="scap-label">
+                        <label className="autoparser-label">
                             Meta Description
                             <textarea
-                                className="scap-textarea"
+                                className="autoparser-textarea"
                                 rows="4"
                                 value={form.meta_description}
                                 onChange={e => update('meta_description', e.target.value)}
@@ -407,20 +485,20 @@ export default function FeedFormShared({
                         </label>
                         {!form.url && (
                             <>
-                                <small className="scap-help text-gray-500">
+                                <small className="autoparser-help text-gray-500">
                                     {__(
                                         'Доступні змінні: {{team1}}, {{team2}}, {{date}}, {{sitename}}, {{title}}, {{excerpt}}',
-                                        'sc-autoparser'
+                                        'autoparser'
                                     )}
                                 </small>
                             </>
                         )}
                         {form.url && (
                             <>
-                                <small className="scap-help text-gray-500">
+                                <small className="autoparser-help text-gray-500">
                                     {__(
                                         'Доступні змінні: {{title}}, {{excerpt}}, {{sitename}}, {{date}}, {{team1}}, {{team2}} ',
-                                        'sc-autoparser'
+                                        'autoparser'
                                     )}
                                 </small>
                             </>
@@ -429,9 +507,9 @@ export default function FeedFormShared({
 
                     {/* save */}
                     <div className="col-span-full flex justify-end">
-                        <Button type="submit" className="scap-btn" disabled={saving}>
+                        <Button type="submit" className="autoparser-btn" disabled={saving}>
                             {saving ?
-                                <Spinner/> : __('Зберегти', 'sc-autoparser')}
+                                <Spinner/> : __('Зберегти', 'autoparser')}
                         </Button>
                     </div>
                 </form>

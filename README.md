@@ -1,10 +1,10 @@
-# SC AutoParser — Gemini Edition 📰🤖
+# AutoParser — Gemini Edition 📰🤖
 
-> **Min WP:** 6.5 | **PHP:** 8.1+ | **Ліцензія:** GPL-2.0-or-later
+> **Min WP:** 6.5 | **PHP:** 8.2+ | **Ліцензія:** GPL-2.0-or-later
 
-SC AutoParser — це плагін для WordPress, який автоматично
+AutoParser — це плагін для WordPress, який автоматично
 
-1. **Парсить** статті з вказаних джерел (DomCrawler або PHPScraper).
+1. **Парсить** статті з вказаних джерел (Symfony DomCrawler).
 2. **Рерайтить** текст через Google Gemini Flash-Lite, зберігаючи сенс і структуру.
 3. **Публікує** контент у Gutenberg-редакторі (категорії, теги, ACF-поля, промо-блоки).
 4. Працює за Cron або вручну — через WP-CLI чи React-адмінку.
@@ -15,13 +15,13 @@ SC AutoParser — це плагін для WordPress, який автомати�
 
 ### 1. ZIP-архів
 
-Завантажте `sc-autoparser.zip` з GitHub Releases → «Плагіни → Додати → Завантажити».
+Завантажте `autoparser.zip` з GitHub Releases → «Плагіни → Додати → Завантажити».
 
 ---
 
 ## ⚡ Швидке налаштування
 
-1. У меню **SC AutoParser** додайте URL-джерела.
+1. У меню **AutoParser** додайте URL-джерела.
 2. У полі **Gemini API Key** збережіть ключ Google AI.
 3. Натисніть **«Запустити парсинг»** 
 
@@ -31,8 +31,8 @@ SC AutoParser — це плагін для WordPress, який автомати�
 
 | Команда | Дія |
 |---------|-----|
-| `wp sc-autoparser run` | Запустити парсинг усіх джерел |
-| `wp sc-autoparser publish --url=<url> [--delay=30] [--cat=1] [--tags=2,3]` | Опублікувати одну статтю або відкласти на *delay* хв |
+| `wp autoparser run [--feed=<id>]` | Запустити парсинг усіх джерел або конкретного |
+| `wp autoparser test-selector --url=<url> [--selector=<css>] [--selector-end=<css>]` | Перевірити, що витягне CSS-селектор, без збереження стрічки |
 
 ---
 
@@ -50,6 +50,12 @@ npm run build      # збирає React-бандл у assets/build/index.js
 
 ```bash
 composer lint   # WordPress Coding Standards
+```
+
+## 🧪 Тести
+
+```bash
+composer test   # PHPUnit — чиста логіка (UrlCanonicalizer, discover-cutoff), без БД/WordPress
 ```
 
 ## 🧪 API Key

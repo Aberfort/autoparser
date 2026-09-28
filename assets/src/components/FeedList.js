@@ -1,4 +1,4 @@
-import {useState, useEffect} from '@wordpress/element';
+import {useState, useEffect, useRef} from '@wordpress/element';
 import {
     Spinner,
     Button,
@@ -7,18 +7,20 @@ import {
     Tooltip,
 } from '@wordpress/components';
 import {trash, edit} from '@wordpress/icons';
-import {__} from '@wordpress/i18n';
+import {__, sprintf} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {motion, AnimatePresence} from 'framer-motion';
 
-const ENDPOINT = '/sc-autoparser/v1/feeds';
+const ENDPOINT = '/autoparser/v1/feeds';
 
-export default function FeedList() {
+export default function FeedList({onAdd, onEdit}) {
     /* ───── state ───── */
     const [feeds, setFeeds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [notice, setNotice] = useState(null);
+    const [importing, setImporting] = useState(false);
+    const fileInputRef = useRef(null);
 
     /* ───── fetch ───── */
     const load = () => {
@@ -29,20 +31,54 @@ export default function FeedList() {
 
     /* ───── delete ───── */
     const deleteFeed = async id => {
-        if (!window.confirm(__('Ви впевнені, що хочете видалити цю ленту?', 'sc-autoparser'))) return;
+        if (!window.confirm(__('Ви впевнені, що хочете видалити цю ленту?', 'autoparser'))) return;
         try {
             await apiFetch({path: `${ENDPOINT}/${id}`, method: 'DELETE'});
             setNotice({
                 status: 'success',
-                message: __('Ленту видалено', 'sc-autoparser')
+                message: __('Ленту видалено', 'autoparser')
             });
             load();
         } catch {
             setNotice({
                 status: 'error',
-                message: __('Помилка видалення', 'sc-autoparser')
+                message: __('Помилка видалення', 'autoparser')
             });
         }
+    };
+
+    /* ───── OPML import ───── */
+    const handleImportFile = (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+
+        setImporting(true);
+        const reader = new FileReader();
+        reader.onload = () => {
+            apiFetch({
+                path: `${ENDPOINT}/import-opml`,
+                method: 'POST',
+                data: {opml: reader.result},
+            })
+                .then(({imported, skipped}) => {
+                    setNotice({
+                        status: 'success',
+                        message: sprintf(
+                            __('Імпортовано %1$d, пропущено %2$d (вже існують). Нові стрічки додано неактивними — перевірте налаштування перед активацією.', 'autoparser'),
+                            imported,
+                            skipped
+                        ),
+                    });
+                    load();
+                })
+                .catch(() => setNotice({
+                    status: 'error',
+                    message: __('Не вдалося імпортувати OPML-файл.', 'autoparser')
+                }))
+                .finally(() => setImporting(false));
+        };
+        reader.readAsText(file);
     };
 
     if (loading) return <Spinner/>;
@@ -58,11 +94,31 @@ export default function FeedList() {
 
             {/* header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-3xl font-bold">{__('Список лент', 'sc-autoparser')}</h2>
-                <Button
-                    className="scap-btn"
-                    onClick={() => window.location = 'admin.php?page=sc-autoparser-add'}
-                >{__('Додати ленту', 'sc-autoparser')}</Button>
+                <h2 className="text-3xl font-bold">{__('Ленти', 'autoparser')}</h2>
+                <div className="flex gap-2">
+                    {window.autoparserOpml?.exportUrl && (
+                        <a
+                            href={window.autoparserOpml.exportUrl}
+                            className="autoparser-btn autoparser-btn--secondary"
+                        >{__('Експорт OPML', 'autoparser')}</a>
+                    )}
+                    <Button
+                        className="autoparser-btn autoparser-btn--secondary"
+                        disabled={importing}
+                        onClick={() => fileInputRef.current?.click()}
+                    >{importing ? <Spinner/> : __('Імпорт OPML', 'autoparser')}</Button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".opml,.xml"
+                        className="hidden"
+                        onChange={handleImportFile}
+                    />
+                    <Button
+                        className="autoparser-btn"
+                        onClick={onAdd}
+                    >{__('Додати ленту', 'autoparser')}</Button>
+                </div>
             </div>
 
             {/* notice */}
@@ -74,15 +130,15 @@ export default function FeedList() {
 
             {/* search */}
             <TextControl
-                placeholder={__('Пошук за назвою або URL…', 'sc-autoparser')}
+                placeholder={__('Пошук за назвою або URL…', 'autoparser')}
                 value={filter}
                 onChange={setFilter}
-                className="max-w-sm scap-input"
+                className="max-w-sm autoparser-input"
             />
 
             {/* table */}
-            <div className="scap-card p-0 overflow-auto">
-                <table className="scap-table">
+            <div className="autoparser-card p-0 overflow-auto">
+                <table className="autoparser-table">
                     <thead>
                     <tr>{['ID', 'Назва', 'URL', 'Статус', 'Активна', 'Дії'].map(h =>
                         <th key={h}>{h}</th>)}</tr>
@@ -91,8 +147,23 @@ export default function FeedList() {
                         <tbody>
                         {visible.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="text-center py-10 text-gray-500">
-                                    {__('Ленти відсутні', 'sc-autoparser')}
+                                <td colSpan={6} className="autoparser-empty">
+                                    <div className="autoparser-empty__icon" aria-hidden="true">🗞️</div>
+                                    <p className="autoparser-empty__title">
+                                        {feeds.length === 0
+                                            ? __('Ще немає жодної стрічки', 'autoparser')
+                                            : __('Нічого не знайдено за цим фільтром', 'autoparser')}
+                                    </p>
+                                    {feeds.length === 0 && (
+                                        <>
+                                            <p className="autoparser-empty__hint">
+                                                {__('Додайте перше джерело — RSS/sitemap URL або AI-прогноз без URL.', 'autoparser')}
+                                            </p>
+                                            <Button className="autoparser-btn" onClick={onAdd}>
+                                                {__('Додати першу ленту', 'autoparser')}
+                                            </Button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         )}
@@ -111,18 +182,18 @@ export default function FeedList() {
                                 <td>{f.status}</td>
                                 <td>{f.active ? '✓' : '—'}</td>
                                 <td className="flex gap-2">
-                                    <Tooltip text={__('Редагувати', 'sc-autoparser')}>
+                                    <Tooltip text={__('Редагувати', 'autoparser')}>
                                         <Button
                                             icon={edit}
-                                            className="scap-btn scap-btn--icon scap-btn--secondary"
-                                            onClick={() => window.location = `admin.php?page=sc-autoparser-edit&feed=${f.id}`}
+                                            className="autoparser-btn autoparser-btn--icon autoparser-btn--secondary"
+                                            onClick={() => onEdit(f.id)}
                                             size="small"
                                         />
                                     </Tooltip>
-                                    <Tooltip text={__('Видалити', 'sc-autoparser')}>
+                                    <Tooltip text={__('Видалити', 'autoparser')}>
                                         <Button
                                             icon={trash}
-                                            className="scap-btn scap-btn--icon scap-btn--danger"
+                                            className="autoparser-btn autoparser-btn--icon autoparser-btn--danger"
                                             onClick={() => deleteFeed(f.id)}
                                             size="small"
                                             isDestructive

@@ -1,10 +1,10 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
-use ScAutoParser\Feed\FeedRepository;
-use ScAutoParser\Feed\Feed;
-use ScAutoParser\Cron\Scheduler;
+use AutoParser\Feed\FeedRepository;
+use AutoParser\Feed\Feed;
+use AutoParser\Cron\Scheduler;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
@@ -15,7 +15,7 @@ class FeedController extends WP_REST_Controller {
 		private FeedRepository $repo,
 		private Scheduler $scheduler
 	) {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'feeds';
 	}
 
@@ -33,6 +33,7 @@ class FeedController extends WP_REST_Controller {
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'permissions' ),
+					'args'                => $this->item_args(),
 				),
 			)
 		);
@@ -49,11 +50,28 @@ class FeedController extends WP_REST_Controller {
 					'methods'             => array( 'PUT', 'PATCH' ),
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'permissions' ),
+					'args'                => $this->item_args(),
 				),
 				array(
 					'methods'             => 'DELETE',
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'permissions' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/import-opml",
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'import_opml' ),
+				'permission_callback' => array( $this, 'permissions' ),
+				'args'                => array(
+					'opml' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
 				),
 			)
 		);
@@ -70,7 +88,7 @@ class FeedController extends WP_REST_Controller {
 
 		return $feed
 			? rest_ensure_response( $this->to_array( $feed ) )
-			: new WP_Error( 'scap_not_found', 'Feed not found', array( 'status' => 404 ) );
+			: new WP_Error( 'autoparser_not_found', 'Feed not found', array( 'status' => 404 ) );
 	}
 
 	public function create_item( $request ) {
@@ -86,13 +104,13 @@ class FeedController extends WP_REST_Controller {
 	public function update_item( $request ) {
 		$feed = $this->repo->find( (int) $request['id'] );
 		if ( ! $feed ) {
-			return new WP_Error( 'scap_not_found', 'Feed not found', array( 'status' => 404 ) );
+			return new WP_Error( 'autoparser_not_found', 'Feed not found', array( 'status' => 404 ) );
 		}
 		$feed = $this->from_request( $request, $feed );
 		$this->repo->save( $feed );
 
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'sc_autoparser_run_feed', array( $feed->id ), 'sc-autoparser' );
+			as_unschedule_all_actions( 'autoparser_run_feed', array( $feed->id ), 'autoparser' );
 		}
 		if ( $feed->active ) {
 			$this->scheduler->schedule_feed( $feed );
@@ -104,21 +122,174 @@ class FeedController extends WP_REST_Controller {
 	public function delete_item( $request ) {
 		$id = (int) $request['id'];
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			as_unschedule_all_actions( 'sc_autoparser_run_feed', array( $id ), 'sc-autoparser' );
+			as_unschedule_all_actions( 'autoparser_run_feed', array( $id ), 'autoparser' );
 		}
 		$ok = $this->repo->delete( $id );
 
 		return $ok
 			? rest_ensure_response( array( 'deleted' => true ) )
-			: new WP_Error( 'scap_delete_failed', 'Delete failed', array( 'status' => 500 ) );
+			: new WP_Error( 'autoparser_delete_failed', 'Delete failed', array( 'status' => 500 ) );
 	}
 
 	public function permissions(): bool {
 		return current_user_can( 'manage_options' );
 	}
 
+	/**
+	 * Imports RSS-sourced feeds from an OPML file's <outline xmlUrl="…">
+	 * entries. Imported feeds are created inactive and as drafts — an
+	 * agency bulk-importing a source list should review/configure each
+	 * one (prompt, selector, categories) before it starts publishing.
+	 */
+	public function import_opml( WP_REST_Request $req ) {
+		$previous_setting = libxml_use_internal_errors( true );
+		$xml              = simplexml_load_string( (string) $req->get_param( 'opml' ) );
+		libxml_use_internal_errors( $previous_setting );
+
+		if ( false === $xml ) {
+			return new WP_Error(
+				'autoparser_invalid_opml',
+				__( 'Не вдалося розпарсити OPML-файл.', 'autoparser' ),
+				array( 'status' => 422 )
+			);
+		}
+
+		$existing_urls = array_map( static fn( Feed $f ) => $f->url, $this->repo->all() );
+
+		$imported = 0;
+		$skipped  = 0;
+
+		foreach ( $xml->xpath( '//outline[@xmlUrl]' ) as $outline ) {
+			$url = esc_url_raw( trim( (string) $outline['xmlUrl'] ) );
+
+			if ( '' === $url || in_array( $url, $existing_urls, true ) ) {
+				++$skipped;
+				continue;
+			}
+
+			$title = trim( (string) $outline['title'] );
+			if ( '' === $title ) {
+				$title = trim( (string) $outline['text'] );
+			}
+
+			$feed           = new Feed();
+			$feed->name     = '' !== $title ? sanitize_text_field( $title ) : $url;
+			$feed->url      = $url;
+			$feed->selector = '';
+			$feed->active   = false;
+			$feed->status   = 'draft';
+
+			$this->repo->save( $feed );
+			$existing_urls[] = $url;
+			++$imported;
+		}
+
+		return rest_ensure_response(
+			array(
+				'imported' => $imported,
+				'skipped'  => $skipped,
+			)
+		);
+	}
+
+	/**
+	 * REST args schema shared by create/update routes — every writable
+	 * field is sanitized before it ever reaches from_request().
+	 */
+	private function item_args(): array {
+		return array(
+			'name'             => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'url'              => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+			),
+			'active'           => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			),
+			'status'           => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'selector'         => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'selector_end'     => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'limit'            => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'post_type'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'author_id'        => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'categories'       => array(
+				'type'              => 'array',
+				'items'             => array( 'type' => 'integer' ),
+				'sanitize_callback' => static function ( $value ) {
+					return array_map( 'absint', (array) $value );
+				},
+			),
+			'prompt'           => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'detail_prompt'    => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'thumbnail_mode'   => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'thumbnail_id'     => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'post_time'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'meta_title'       => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'meta_description' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_textarea_field',
+			),
+			'image_dir'        => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'predict_only'     => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => 'rest_sanitize_boolean',
+			),
+			'ai_provider'      => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+			'language'         => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_key',
+			),
+		);
+	}
+
 	private function from_request( WP_REST_Request $req, ?Feed $feed = null ): Feed {
-		$feed                   ??= new Feed();
+		$feed                 ??= new Feed();
 		$feed->name             = $req->get_param( 'name' ) ?? $feed->name;
 		$feed->url              = $req->get_param( 'url' ) ?? $feed->url;
 		$feed->active           = $req->has_param( 'active' ) ? (bool) $req['active'] : $feed->active;
@@ -139,6 +310,7 @@ class FeedController extends WP_REST_Controller {
 		$feed->image_dir        = $req->get_param( 'image_dir' ) ?? $feed->image_dir;
 		$feed->predict_only     = $req->has_param( 'predict_only' ) ? (bool) $req['predict_only'] : $feed->predict_only;
 		$feed->ai_provider      = $req->get_param( 'ai_provider' ) ?? $feed->ai_provider;
+		$feed->language         = $req->get_param( 'language' ) ?? $feed->language;
 
 		return $feed;
 	}
@@ -171,6 +343,7 @@ class FeedController extends WP_REST_Controller {
 			'last_msg'         => $f->last_msg,
 			'predict_only'     => $f->predict_only,
 			'ai_provider'      => $f->ai_provider,
+			'language'         => $f->language,
 		);
 	}
 }

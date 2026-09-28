@@ -1,5 +1,5 @@
 {
-  "name": "example/sc-autoparser",
+  "name": "example/autoparser",
   "description": "Automatic parser with Gemini AI rewrite & Gutenberg autoposting.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
@@ -18,12 +18,17 @@
   },
   "autoload": {
     "psr-4": {
-      "ScAutoParser\\": "src/"
+      "AutoParser\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AutoParser\\Tests\\": "tests/"
     }
   },
   "scripts": {
-    "lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor ./src",
-    "lint-fix": "phpcbf --standard=WordPress --extensions=php --ignore=vendor ./src",
+    "lint": "phpcs",
+    "lint-fix": "phpcbf",
     "test": "vendor/bin/phpunit",
     "build": "wp-scripts build",
     "start": "wp-scripts start"
@@ -44,6 +49,8 @@
     "squizlabs/php_codesniffer": "^3.8",
     "wp-coding-standards/wpcs": "^3.1",
     "phpcsstandards/phpcsutils": "^1.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpunit/phpunit": "^10.5",
+    "brain/monkey": "^2.6"
   }
 }

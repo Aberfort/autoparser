@@ -1,6 +1,6 @@
 <?php
 
-namespace ScAutoParser\Core;
+namespace AutoParser\Core;
 
 /**
  * Misc helper methods (static).
@@ -23,13 +23,32 @@ final class Helpers {
 	/**
 	 * Download remote image and sideload to Media Library.
 	 *
+	 * @param string $url    Remote image URL.
+	 * @param string $subdir Optional uploads subdirectory (e.g. Feed::$image_dir), relative to the uploads base dir.
 	 * @return int|WP_Error Attachment ID.
 	 */
-	public static function sideload_image( string $url ): int|\WP_Error {
+	public static function sideload_image( string $url, string $subdir = '' ): int|\WP_Error {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 
-		return media_sideload_image( $url, 0, null, 'id' );
+		if ( '' === trim( $subdir ) ) {
+			return media_sideload_image( $url, 0, null, 'id' );
+		}
+
+		$subdir           = '/' . trim( $subdir, '/' );
+		$redirect_uploads = static function ( array $uploads ) use ( $subdir ): array {
+			$uploads['subdir'] = $subdir;
+			$uploads['path']   = $uploads['basedir'] . $subdir;
+			$uploads['url']    = $uploads['baseurl'] . $subdir;
+
+			return $uploads;
+		};
+
+		add_filter( 'upload_dir', $redirect_uploads );
+		$attachment_id = media_sideload_image( $url, 0, null, 'id' );
+		remove_filter( 'upload_dir', $redirect_uploads );
+
+		return $attachment_id;
 	}
 }

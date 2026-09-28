@@ -1,18 +1,19 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
+use AutoParser\Core\UsageTracker;
 
 /**
  * /settings
  */
 class SettingsController extends WP_REST_Controller {
 
-	public function __construct() {
-		$this->namespace = 'sc-autoparser/v1';
+	public function __construct( private UsageTracker $usage ) {
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'settings';
 	}
 
@@ -21,19 +22,36 @@ class SettingsController extends WP_REST_Controller {
 		register_rest_route(
 			$this->namespace,
 			"/{$this->rest_base}",
-			[
-				[
+			array(
+				array(
 					'methods'             => 'GET',
-					'callback'            => [ $this, 'get' ],
-					'permission_callback' => [ $this, 'can_manage' ],
-				],
-				[
-					'methods'             => [ 'POST', 'PUT', 'PATCH' ],
-					'callback'            => [ $this, 'save' ],
-					'permission_callback' => [ $this, 'can_manage' ],
-				],
-			]
+					'callback'            => array( $this, 'get' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+				array(
+					'methods'             => array( 'POST', 'PUT', 'PATCH' ),
+					'callback'            => array( $this, 'save' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+				),
+			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/usage",
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'usage' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+	}
+
+	/**
+	 * Per-provider AI call counters (not cost — see UsageTracker docblock).
+	 */
+	public function usage(): \WP_HTTP_Response {
+		return rest_ensure_response( $this->usage->get_stats() );
 	}
 
 	/* ===== permissions ===== */
@@ -45,13 +63,15 @@ class SettingsController extends WP_REST_Controller {
 	public function get(): \WP_HTTP_Response {
 		return rest_ensure_response(
 			get_option(
-				'scap_settings',
-				[
-					'gemini_api_key' => '',
-					'openai_api_key' => '',
-					'global_prompt'  => '',
-					'openai_model'   => '',
-				]
+				'autoparser_settings',
+				array(
+					'gemini_api_key'        => '',
+					'openai_api_key'        => '',
+					'global_prompt'         => '',
+					'openai_model'          => '',
+					'enable_fallback_proxy' => false,
+					'predictions_enabled'   => false,
+				)
 			)
 		);
 	}
@@ -59,7 +79,7 @@ class SettingsController extends WP_REST_Controller {
 	/* ====== SAVE (POST|PUT|PATCH) ====== */
 	public function save( WP_REST_Request $r ): \WP_HTTP_Response {
 
-		$opts = get_option( 'scap_settings', [] );
+		$opts = get_option( 'autoparser_settings', array() );
 
 		$opts['fixtures_api_key'] = sanitize_text_field( $r->get_param( 'fixtures_api_key' ) ?? '' );
 
@@ -83,7 +103,17 @@ class SettingsController extends WP_REST_Controller {
 			$opts['global_prompt'] = sanitize_textarea_field( $r['global_prompt'] );
 		}
 
-		update_option( 'scap_settings', $opts );
+		// резервний проксі r.jina.ai при 403/503 від джерела — вимкнено за замовчуванням
+		if ( $r->has_param( 'enable_fallback_proxy' ) ) {
+			$opts['enable_fallback_proxy'] = (bool) $r['enable_fallback_proxy'];
+		}
+
+		// опційний модуль AI-прогнозів (футбол) — вимкнено за замовчуванням
+		if ( $r->has_param( 'predictions_enabled' ) ) {
+			$opts['predictions_enabled'] = (bool) $r['predictions_enabled'];
+		}
+
+		update_option( 'autoparser_settings', $opts );
 
 		return rest_ensure_response( $opts );
 	}

@@ -5,10 +5,10 @@
  * Дає TOP-матчі «сьогодні» з урахуванням локальної TZ WordPress.
  */
 
-namespace ScAutoParser\Fixtures;
+namespace AutoParser\Modules\Predictions;
 
 use GuzzleHttp\Client;
-use ScAutoParser\Core\Logger;
+use AutoParser\Core\Logger;
 
 class FixturesService {
 
@@ -16,7 +16,7 @@ class FixturesService {
 	private const BASE_URL = 'https://v3.football.api-sports.io';
 
 	/* TOP-ліги: id → пріоритет */
-	private const TOP_LEAGUES = [
+	private const TOP_LEAGUES = array(
 		2   => 1, // UCL – Champions League
 		3   => 2, // UEL – Europa League
 		848 => 3, // UEFA Conference League
@@ -48,10 +48,10 @@ class FixturesService {
 		98  => 29, // Японія J1 League
 		292 => 30, // Південна Корея K-League 1
 
-	];
+	);
 
 	public function __construct(
-		private string $apiKey,
+		private string $api_key,
 		private Client $http,
 		private Logger $log,
 	) {
@@ -60,47 +60,47 @@ class FixturesService {
 	/**
 	 * @return array<array{team1:string,team2:string,datetime:string,league:string}>
 	 */
-	public function todayTop( int $limit = 5 ): array {
+	public function today_top( int $limit = 5 ): array {
 
-		$tzSite   = wp_timezone();                 // WP тайм-зона (DateTimeZone)
-		$todayLoc = ( new \DateTimeImmutable( 'now', $tzSite ) )->format( 'Y-m-d' ); // «2025-05-20»
-		$todayUtc = ( new \DateTimeImmutable( 'now', new \DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d' );
+		$tz_site   = wp_timezone();                 // WP тайм-зона (DateTimeZone)
+		$today_loc = ( new \DateTimeImmutable( 'now', $tz_site ) )->format( 'Y-m-d' ); // «2025-05-20»
+		$today_utc = ( new \DateTimeImmutable( 'now', new \DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d' );
 
-		$this->log->info( "[Fixtures] Fetch $todayUtc (UTC) → відфільтровуємо $todayLoc ($tzSite->getName())" );
+		$this->log->info( "[Fixtures] Fetch $today_utc (UTC) → відфільтровуємо $today_loc ($tz_site->getName())" );
 
 		/* ①  HTTP-запит */
-		$response = $this->get( '/fixtures', [ 'date' => $todayUtc ] );
+		$response = $this->get( '/fixtures', array( 'date' => $today_utc ) );
 
-		$rows = [];
+		$rows = array();
 		foreach ( $response as $fx ) {
 
-			$leagueId   = (int) ( $fx['league']['id'] ?? 0 );
-			$leagueName = $fx['league']['name'] ?? '';
+			$league_id   = (int) ( $fx['league']['id'] ?? 0 );
+			$league_name = $fx['league']['name'] ?? '';
 
 			/* тільки whitelisted ліги */
-			if ( ! isset( self::TOP_LEAGUES[ $leagueId ] ) ) {
+			if ( ! isset( self::TOP_LEAGUES[ $league_id ] ) ) {
 				continue;
 			}
 
-			$utcIso = $fx['fixture']['date'] ?? '';          // 2025-05-20T19:00:00+00:00
-			$dtLoc  = ( new \DateTimeImmutable( $utcIso ) )->setTimezone( $tzSite );
+			$utc_iso = $fx['fixture']['date'] ?? '';          // 2025-05-20T19:00:00+00:00
+			$dt_loc  = ( new \DateTimeImmutable( $utc_iso ) )->setTimezone( $tz_site );
 
 			/* відкидаємо, якщо після конвертації це вже не «сьогодні» */
-			if ( $dtLoc->format( 'Y-m-d' ) !== $todayLoc ) {
+			if ( $dt_loc->format( 'Y-m-d' ) !== $today_loc ) {
 				continue;
 			}
 
-			$rows[] = [
+			$rows[] = array(
 				'team1'    => $fx['teams']['home']['name'] ?? '',
 				'team2'    => $fx['teams']['away']['name'] ?? '',
-				'datetime' => $dtLoc->format( 'd.m.Y H:i' ),
+				'datetime' => $dt_loc->format( 'd.m.Y H:i' ),
 				// 20.05.2025 22:00
-				'league'   => $leagueName,
-				'__prio'   => self::TOP_LEAGUES[ $leagueId ],
-			];
+				'league'   => $league_name,
+				'__prio'   => self::TOP_LEAGUES[ $league_id ],
+			);
 		}
 
-		if ( $rows === [] ) {
+		if ( $rows === array() ) {
 			throw new \RuntimeException( 'No fixtures from TOP leagues for today' );
 		}
 
@@ -116,27 +116,27 @@ class FixturesService {
 		/* прибираємо технічне поле */
 
 		return array_map(
-			static fn( $r ) => array_diff_key( $r, [ '__prio' => true ] ),
+			static fn( $r ) => array_diff_key( $r, array( '__prio' => true ) ),
 			$rows
 		);
 	}
 
 	/* ───────────────────────── Low-level GET ───────────────────────── */
 
-	private function get( string $endpoint, array $query = [] ): array {
+	private function get( string $endpoint, array $query = array() ): array {
 
 		$url = self::BASE_URL . $endpoint . '?' . http_build_query( $query );
 
 		try {
 			$resp = $this->http->get(
 				$url,
-				[
-					'headers' => [
-						'x-apisports-key' => $this->apiKey,
+				array(
+					'headers' => array(
+						'x-apisports-key' => $this->api_key,
 						'Accept'          => 'application/json',
-					],
+					),
 					'timeout' => 15,
-				]
+				)
 			);
 		} catch ( \Throwable $e ) {
 			throw new \RuntimeException( 'HTTP error: ' . $e->getMessage() );

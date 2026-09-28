@@ -1,11 +1,12 @@
 <?php
 
-namespace ScAutoParser\Admin\REST;
+namespace AutoParser\Admin\REST;
 
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
-use ScAutoParser\Parser\ParserService;
+use AutoParser\Parser\ParserService;
+use AutoParser\Feed\FeedRepository;
 
 /**
  * REST-контролер для /cron
@@ -13,9 +14,10 @@ use ScAutoParser\Parser\ParserService;
 class ScheduleController extends WP_REST_Controller {
 
 	public function __construct(
-		private ParserService $parser
+		private ParserService $parser,
+		private FeedRepository $feeds
 	) {
-		$this->namespace = 'sc-autoparser/v1';
+		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'cron';
 	}
 
@@ -65,7 +67,7 @@ class ScheduleController extends WP_REST_Controller {
 		$store = \ActionScheduler::store();
 		$ids   = $store->query_actions(
 			array(
-				'group'    => 'sc-autoparser',
+				'group'    => 'autoparser',
 				'status'   => array( 'pending', 'in-progress' ),
 				'orderby'  => 'scheduled_date',
 				'order'    => 'ASC',
@@ -75,15 +77,21 @@ class ScheduleController extends WP_REST_Controller {
 
 		$out = array();
 		foreach ( $ids as $id ) {
-			$action = $store->fetch_action( $id );
-			$sched  = $action->get_schedule();
-			$date   = $sched && $sched->get_date()
+			$action  = $store->fetch_action( $id );
+			$sched   = $action->get_schedule();
+			$date    = $sched && $sched->get_date()
 				? $sched->get_date()->format( 'Y-m-d H:i:s' )
 				: '';
+			$feed_id = $action->get_args()[0] ?? null;
+			$feed    = $feed_id ? $this->feeds->find( (int) $feed_id ) : null;
 
 			$out[] = array(
 				'id'        => $id,
-				'feed_id'   => $action->get_args()[0] ?? null,
+				'feed_id'   => $feed_id,
+				'feed_name' => $feed
+					? $feed->name
+					/* translators: %d: feed ID of a feed that no longer exists. */
+					: sprintf( __( '#%d (видалено)', 'autoparser' ), (int) $feed_id ),
 				'status'    => $store->get_status( $id ),
 				'scheduled' => $date,
 				'attempts'  => $store->get_claim_count( $id ),

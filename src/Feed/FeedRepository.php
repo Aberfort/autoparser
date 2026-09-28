@@ -1,12 +1,12 @@
 <?php
 
-namespace ScAutoParser\Feed;
+namespace AutoParser\Feed;
 
-use ScAutoParser\Core\Logger;
+use AutoParser\Core\Logger;
 use wpdb;
 
 /**
- * CRUD around the `scap_feeds` table.
+ * CRUD around the `autoparser_feeds` table.
  */
 class FeedRepository {
 
@@ -16,7 +16,7 @@ class FeedRepository {
 		private wpdb $db,
 		private Logger $log
 	) {
-		$this->table = $this->db->prefix . 'scap_feeds';
+		$this->table = $this->db->prefix . 'autoparser_feeds';
 	}
 
 	/* ---------- Installation ---------- */
@@ -50,6 +50,7 @@ class FeedRepository {
  			last_msg    TEXT NULL,
  			predict_only  TINYINT(1) NOT NULL DEFAULT 0,
  			ai_provider    VARCHAR(20) NOT NULL DEFAULT 'gemini',
+ 			language      VARCHAR(10) NOT NULL DEFAULT '',
  			created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
@@ -97,6 +98,7 @@ class FeedRepository {
 			'image_dir'        => $feed->image_dir,
 			'predict_only'     => (int) $feed->predict_only,
 			'ai_provider'      => $feed->ai_provider,
+			'language'         => $feed->language,
 		);
 
 		if ( $feed->id ) {
@@ -126,8 +128,8 @@ class FeedRepository {
 			selector: $row['selector'],
 			selector_end: $row['selector_end'],
 			limit: (int) $row['limit'],
-            last_ts: isset( $row['last_ts'] ) ? (int) $row['last_ts'] : 0,
-            post_type: $row['post_type'],
+			last_ts: isset( $row['last_ts'] ) ? (int) $row['last_ts'] : 0,
+			post_type: $row['post_type'],
 			author_id: (int) $row['author_id'],
 			categories: (array) json_decode( $row['categories'], true ),
 			prompt: $row['prompt'],
@@ -145,6 +147,7 @@ class FeedRepository {
 			last_msg: $row['last_msg'] ?? '',
 			predict_only: (bool) $row['predict_only'],
 			ai_provider: $row['ai_provider'] ?? 'gemini',
+			language: $row['language'] ?? '',
 		);
 	}
 
@@ -160,13 +163,13 @@ class FeedRepository {
 		);
 	}
 
-    public function update_last_ts( int $id, int $ts ): void {
-        $this->db->update(
-            $this->table,
-            [ 'last_ts' => $ts ],
-            [ 'id' => $id ],
-            [ '%d' ],
-            [ '%d' ]
-        );
-    }
+	public function update_last_ts( int $id, int $ts ): void {
+		$this->db->update(
+			$this->table,
+			array( 'last_ts' => $ts ),
+			array( 'id' => $id ),
+			array( '%d' ),
+			array( '%d' )
+		);
+	}
 }
