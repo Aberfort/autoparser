@@ -83,6 +83,17 @@ class Controller {
 			$asset['version'],
 			true
 		);
+
+		wp_localize_script(
+			'autoparser-admin',
+			'autoparserOpml',
+			array(
+				'exportUrl' => wp_nonce_url(
+					admin_url( 'admin-post.php?action=' . OpmlHandler::ACTION ),
+					OpmlHandler::ACTION
+				),
+			)
+		);
 	}
 
 	/* ---------- RENDERS ---------- */

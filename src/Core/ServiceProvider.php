@@ -11,6 +11,7 @@ use GuzzleHttp\Client;
 use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
 use AutoParser\Admin\Controller as AdminController;
+use AutoParser\Admin\OpmlHandler;
 use AutoParser\Admin\REST\FeedController as FeedRest;
 use AutoParser\Admin\REST\FeedRunController as FeedRunRest;
 use AutoParser\Admin\REST\LogController;
@@ -137,6 +138,9 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── Admin pages ───────── */
 		$c['admin.controller'] = static fn() => new AdminController( AUTOPARSER_VERSION );
+
+		/* ───────── OPML export (admin-post, not REST) ───────── */
+		$c['opml.handler'] = static fn() => new OpmlHandler( $c['feed.repository'] );
 
 		/* ───────── REST: Logs & Settings ───────── */
 		$c['log.rest']      = static fn() => new LogController( WP_CONTENT_DIR . '/uploads/autoparser/logs' );

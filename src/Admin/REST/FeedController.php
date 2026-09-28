@@ -59,6 +59,22 @@ class FeedController extends WP_REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/import-opml",
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'import_opml' ),
+				'permission_callback' => array( $this, 'permissions' ),
+				'args'                => array(
+					'opml' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
 	}
 
 	public function get_items( $request ) {
@@ -117,6 +133,63 @@ class FeedController extends WP_REST_Controller {
 
 	public function permissions(): bool {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Imports RSS-sourced feeds from an OPML file's <outline xmlUrl="…">
+	 * entries. Imported feeds are created inactive and as drafts — an
+	 * agency bulk-importing a source list should review/configure each
+	 * one (prompt, selector, categories) before it starts publishing.
+	 */
+	public function import_opml( WP_REST_Request $req ) {
+		$previous_setting = libxml_use_internal_errors( true );
+		$xml              = simplexml_load_string( (string) $req->get_param( 'opml' ) );
+		libxml_use_internal_errors( $previous_setting );
+
+		if ( false === $xml ) {
+			return new WP_Error(
+				'autoparser_invalid_opml',
+				__( 'Не вдалося розпарсити OPML-файл.', 'autoparser' ),
+				array( 'status' => 422 )
+			);
+		}
+
+		$existing_urls = array_map( static fn( Feed $f ) => $f->url, $this->repo->all() );
+
+		$imported = 0;
+		$skipped  = 0;
+
+		foreach ( $xml->xpath( '//outline[@xmlUrl]' ) as $outline ) {
+			$url = esc_url_raw( trim( (string) $outline['xmlUrl'] ) );
+
+			if ( '' === $url || in_array( $url, $existing_urls, true ) ) {
+				++$skipped;
+				continue;
+			}
+
+			$title = trim( (string) $outline['title'] );
+			if ( '' === $title ) {
+				$title = trim( (string) $outline['text'] );
+			}
+
+			$feed           = new Feed();
+			$feed->name     = '' !== $title ? sanitize_text_field( $title ) : $url;
+			$feed->url      = $url;
+			$feed->selector = '';
+			$feed->active   = false;
+			$feed->status   = 'draft';
+
+			$this->repo->save( $feed );
+			$existing_urls[] = $url;
+			++$imported;
+		}
+
+		return rest_ensure_response(
+			array(
+				'imported' => $imported,
+				'skipped'  => $skipped,
+			)
+		);
 	}
 
 	/**

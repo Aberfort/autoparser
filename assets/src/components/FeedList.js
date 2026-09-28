@@ -1,4 +1,4 @@
-import {useState, useEffect} from '@wordpress/element';
+import {useState, useEffect, useRef} from '@wordpress/element';
 import {
     Spinner,
     Button,
@@ -7,7 +7,7 @@ import {
     Tooltip,
 } from '@wordpress/components';
 import {trash, edit} from '@wordpress/icons';
-import {__} from '@wordpress/i18n';
+import {__, sprintf} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {motion, AnimatePresence} from 'framer-motion';
 
@@ -19,6 +19,8 @@ export default function FeedList({onAdd, onEdit}) {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [notice, setNotice] = useState(null);
+    const [importing, setImporting] = useState(false);
+    const fileInputRef = useRef(null);
 
     /* ───── fetch ───── */
     const load = () => {
@@ -45,6 +47,40 @@ export default function FeedList({onAdd, onEdit}) {
         }
     };
 
+    /* ───── OPML import ───── */
+    const handleImportFile = (e) => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+
+        setImporting(true);
+        const reader = new FileReader();
+        reader.onload = () => {
+            apiFetch({
+                path: `${ENDPOINT}/import-opml`,
+                method: 'POST',
+                data: {opml: reader.result},
+            })
+                .then(({imported, skipped}) => {
+                    setNotice({
+                        status: 'success',
+                        message: sprintf(
+                            __('Імпортовано %1$d, пропущено %2$d (вже існують). Нові стрічки додано неактивними — перевірте налаштування перед активацією.', 'autoparser'),
+                            imported,
+                            skipped
+                        ),
+                    });
+                    load();
+                })
+                .catch(() => setNotice({
+                    status: 'error',
+                    message: __('Не вдалося імпортувати OPML-файл.', 'autoparser')
+                }))
+                .finally(() => setImporting(false));
+        };
+        reader.readAsText(file);
+    };
+
     if (loading) return <Spinner/>;
 
     /* ───── filter ───── */
@@ -59,10 +95,30 @@ export default function FeedList({onAdd, onEdit}) {
             {/* header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <h2 className="text-3xl font-bold">{__('Ленти', 'autoparser')}</h2>
-                <Button
-                    className="autoparser-btn"
-                    onClick={onAdd}
-                >{__('Додати ленту', 'autoparser')}</Button>
+                <div className="flex gap-2">
+                    {window.autoparserOpml?.exportUrl && (
+                        <a
+                            href={window.autoparserOpml.exportUrl}
+                            className="autoparser-btn autoparser-btn--secondary"
+                        >{__('Експорт OPML', 'autoparser')}</a>
+                    )}
+                    <Button
+                        className="autoparser-btn autoparser-btn--secondary"
+                        disabled={importing}
+                        onClick={() => fileInputRef.current?.click()}
+                    >{importing ? <Spinner/> : __('Імпорт OPML', 'autoparser')}</Button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".opml,.xml"
+                        className="hidden"
+                        onChange={handleImportFile}
+                    />
+                    <Button
+                        className="autoparser-btn"
+                        onClick={onAdd}
+                    >{__('Додати ленту', 'autoparser')}</Button>
+                </div>
             </div>
 
             {/* notice */}

@@ -50,6 +50,9 @@ final class Plugin {
 		);
 		add_action( 'admin_notices', array( $this->c['admin.controller'], 'maybe_missing_api_key_notice' ) );
 
+		/* OPML export */
+		$this->c['opml.handler']->register();
+
 		/* Scheduler hook */
 		$this->c['cron.scheduler']->register_hook();
 
