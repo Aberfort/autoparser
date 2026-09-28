@@ -9,9 +9,8 @@
 namespace AutoParser\Parser;
 
 use GuzzleHttp\Client;
-use AutoParser\AI\PredictionService;
-use AutoParser\AI\RewriteService;
 use AutoParser\Core\Logger;
+use AutoParser\Core\UsageTracker;
 use AutoParser\Feed\Feed;
 use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
@@ -49,12 +48,11 @@ PROMPT;
 	public function __construct(
 		private FeedRepository $feeds,
 		private PostMapRepository $maps,
-		private RewriteService $aiRewrite,
-		private PredictionService $aiPredict,
 		private FixturesService $fixtures,
 		private GutenbergPublisher $publisher,
 		private Client $http,
 		private Logger $log,
+		private UsageTracker $usage,
 	) {
 	}
 
@@ -245,6 +243,7 @@ PROMPT;
 
 			try {
 				$html = $predictor->getForecast( $prompt, array() );
+				$this->usage->record( $feed->ai_provider ?: 'gemini', 'forecast' );
 			} catch ( \Throwable $e ) {
 				$this->log->warning(
 					'Skip forecast: ' . $e->getMessage(),
@@ -379,6 +378,8 @@ PROMPT;
 				$rewritten = $bodyPrompt
 					? $rewriter->rewrite( $content, $bodyPrompt )
 					: $content;
+
+				$this->usage->record( $feed->ai_provider ?: 'gemini', 'rewrite' );
 
 				/* Thumbnail */
 				$thumbId = null;

@@ -25,6 +25,7 @@ export default function Settings() {
     const [predictionsEnabled, setPredictionsEnabled] = useState(false);
 
     const [notice, setNotice] = useState(null);
+    const [usage, setUsage] = useState(null);
 
     /* ───────── fetch on mount ───────── */
     useEffect(() => {
@@ -39,6 +40,10 @@ export default function Settings() {
                 setPredictionsEnabled(!!d.predictions_enabled);
             })
             .finally(() => setLoading(false));
+
+        apiFetch({path: '/autoparser/v1/settings/usage'})
+            .then(setUsage)
+            .catch(() => setUsage({}));
     }, []);
 
     /* ───────── save ───────── */
@@ -155,6 +160,35 @@ export default function Settings() {
                     </div>
                 </div>
             </div>
+
+            {usage && Object.keys(usage).length > 0 && (
+                <div className="autoparser-card">
+                    <div className="autoparser-card__head">
+                        <h2 className="text-xl font-semibold">{__('Використання AI', 'autoparser')}</h2>
+                    </div>
+                    <div className="p-10">
+                        <p className="autoparser-help text-gray-500 mb-4">
+                            {__('Кількість викликів AI-провайдера (не вартість — тарифи змінюються надто часто, щоб їх надійно порахувати тут).', 'autoparser')}
+                        </p>
+                        <table className="autoparser-table">
+                            <thead>
+                            <tr>
+                                <th>{__('Провайдер', 'autoparser')}</th>
+                                <th>{__('Усього викликів', 'autoparser')}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {Object.entries(usage).map(([provider, stats]) => (
+                                <tr key={provider}>
+                                    <td>{provider}</td>
+                                    <td>{stats.total ?? 0}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

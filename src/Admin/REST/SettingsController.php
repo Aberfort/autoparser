@@ -5,13 +5,14 @@ namespace AutoParser\Admin\REST;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_Error;
+use AutoParser\Core\UsageTracker;
 
 /**
  * /settings
  */
 class SettingsController extends WP_REST_Controller {
 
-	public function __construct() {
+	public function __construct( private UsageTracker $usage ) {
 		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'settings';
 	}
@@ -34,6 +35,23 @@ class SettingsController extends WP_REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/usage",
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'usage' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+			)
+		);
+	}
+
+	/**
+	 * Per-provider AI call counters (not cost — see UsageTracker docblock).
+	 */
+	public function usage(): \WP_HTTP_Response {
+		return rest_ensure_response( $this->usage->get_stats() );
 	}
 
 	/* ===== permissions ===== */

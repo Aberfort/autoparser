@@ -18,14 +18,11 @@ use AutoParser\Admin\REST\FeedRunController as FeedRunRest;
 use AutoParser\Admin\REST\LogController;
 use AutoParser\Admin\REST\ScheduleController;
 use AutoParser\Admin\REST\SettingsController;
-use AutoParser\AI\RewriteService;
-use AutoParser\AI\PredictionService;
 use AutoParser\Parser\ParserService;
 use AutoParser\Publisher\GutenbergPublisher;
 use AutoParser\Cron\Scheduler;
 use AutoParser\CLI\RunCommand;
 use AutoParser\CLI\TestSelectorCommand;
-use AutoParser\AI\ProviderFactory;
 
 class ServiceProvider implements ServiceProviderInterface {
 
@@ -65,16 +62,6 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		/* ───────── AI Rewrite (provider-aware) ───────── */
-		$c['ai.rewrite'] = static function () use ( $c ): RewriteService {
-			$settings = get_option( 'autoparser_settings', array() );
-			$default  = $settings['default_ai'] ?? 'gemini';
-
-			$provider = ProviderFactory::make( $default );
-
-			return new RewriteService( $provider );
-		};
-
 		/* ---------- Fixtures (RapidAPI) ---------- */
 		$c['fixtures'] = static function () use ( $c ): \AutoParser\Modules\Predictions\FixturesService {
 			$opts = get_option( 'autoparser_settings', array() );
@@ -86,30 +73,22 @@ class ServiceProvider implements ServiceProviderInterface {
 			);
 		};
 
-		/* ───────── AI Prediction (provider-aware) ───────── */
-		$c['ai.prediction'] = static function () use ( $c ): PredictionService {
-			$settings = get_option( 'autoparser_settings', array() );
-			$default  = $settings['default_ai'] ?? 'gemini';
-
-			$provider = ProviderFactory::make( $default );
-
-			return new PredictionService( $provider );
-		};
-
 		/* ───────── Publisher ───────── */
 		$c['publisher'] = static fn() => new GutenbergPublisher();
+
+		/* ───────── Usage tracking (per-provider call counters) ───────── */
+		$c['usage.tracker'] = static fn() => new UsageTracker();
 
 		/* ───────── Parser Service ───────── */
 		$c['parser.service'] = static function () use ( $c ): ParserService {
 			return new ParserService(
 				$c['feed.repository'],
 				$c['feed.post_map'],
-				$c['ai.rewrite'],
-				$c['ai.prediction'],
 				$c['fixtures'],
 				$c['publisher'],
 				$c['http'],
 				$c['logger'],
+				$c['usage.tracker'],
 			);
 		};
 
@@ -148,6 +127,6 @@ class ServiceProvider implements ServiceProviderInterface {
 
 		/* ───────── REST: Logs & Settings ───────── */
 		$c['log.rest']      = static fn() => new LogController( WP_CONTENT_DIR . '/uploads/autoparser/logs' );
-		$c['settings.rest'] = static fn() => new SettingsController();
+		$c['settings.rest'] = static fn() => new SettingsController( $c['usage.tracker'] );
 	}
 }
