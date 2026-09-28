@@ -61,7 +61,8 @@ export default function CronTable() {
     if (loading) return <Spinner/>;
 
     const visible = rows.filter(r =>
-        `${r.feed_id}`.includes(filter) || r.status.includes(filter)
+        `${r.feed_name ?? r.feed_id}`.toLowerCase().includes(filter.toLowerCase())
+        || r.status.includes(filter)
     );
 
     return (
@@ -114,7 +115,7 @@ export default function CronTable() {
                                 transition={{duration: .15}}
                             >
                                 <td>{r.id}</td>
-                                <td>{r.feed_id ?? '—'}</td>
+                                <td>{r.feed_name ?? '—'}</td>
                                 <td><span className={badge(r.status)}>
                                         {r.status === 'in-progress'
                                             ? __('Запускається', 'autoparser')

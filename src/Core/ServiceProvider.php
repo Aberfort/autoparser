@@ -120,7 +120,7 @@ class ServiceProvider implements ServiceProviderInterface {
 		$c['cron.scheduler'] = static fn() => new Scheduler( $c['parser.service'] );
 
 		/* ───────── REST: Schedule ───────── */
-		$c['schedule.rest'] = static fn() => new ScheduleController( $c['parser.service'] );
+		$c['schedule.rest'] = static fn() => new ScheduleController( $c['parser.service'], $c['feed.repository'] );
 
 		/* ───────── CLI command ───────── */
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {

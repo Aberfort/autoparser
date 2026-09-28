@@ -48,6 +48,7 @@ final class Plugin {
 				'enqueue',
 			)
 		);
+		add_action( 'admin_notices', array( $this->c['admin.controller'], 'maybe_missing_api_key_notice' ) );
 
 		/* Scheduler hook */
 		$this->c['cron.scheduler']->register_hook();

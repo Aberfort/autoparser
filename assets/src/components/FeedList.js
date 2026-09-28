@@ -13,7 +13,7 @@ import {motion, AnimatePresence} from 'framer-motion';
 
 const ENDPOINT = '/autoparser/v1/feeds';
 
-export default function FeedList() {
+export default function FeedList({onAdd, onEdit}) {
     /* ───── state ───── */
     const [feeds, setFeeds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,10 +58,10 @@ export default function FeedList() {
 
             {/* header */}
             <div className="flex flex-wrap items-center justify-between gap-4">
-                <h2 className="text-3xl font-bold">{__('Список лент', 'autoparser')}</h2>
+                <h2 className="text-3xl font-bold">{__('Ленти', 'autoparser')}</h2>
                 <Button
                     className="autoparser-btn"
-                    onClick={() => window.location = 'admin.php?page=autoparser-add'}
+                    onClick={onAdd}
                 >{__('Додати ленту', 'autoparser')}</Button>
             </div>
 
@@ -91,8 +91,23 @@ export default function FeedList() {
                         <tbody>
                         {visible.length === 0 && (
                             <tr>
-                                <td colSpan={6} className="text-center py-10 text-gray-500">
-                                    {__('Ленти відсутні', 'autoparser')}
+                                <td colSpan={6} className="autoparser-empty">
+                                    <div className="autoparser-empty__icon" aria-hidden="true">🗞️</div>
+                                    <p className="autoparser-empty__title">
+                                        {feeds.length === 0
+                                            ? __('Ще немає жодної стрічки', 'autoparser')
+                                            : __('Нічого не знайдено за цим фільтром', 'autoparser')}
+                                    </p>
+                                    {feeds.length === 0 && (
+                                        <>
+                                            <p className="autoparser-empty__hint">
+                                                {__('Додайте перше джерело — RSS/sitemap URL або AI-прогноз без URL.', 'autoparser')}
+                                            </p>
+                                            <Button className="autoparser-btn" onClick={onAdd}>
+                                                {__('Додати першу ленту', 'autoparser')}
+                                            </Button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         )}
@@ -115,7 +130,7 @@ export default function FeedList() {
                                         <Button
                                             icon={edit}
                                             className="autoparser-btn autoparser-btn--icon autoparser-btn--secondary"
-                                            onClick={() => window.location = `admin.php?page=autoparser-edit&feed=${f.id}`}
+                                            onClick={() => onEdit(f.id)}
                                             size="small"
                                         />
                                     </Tooltip>

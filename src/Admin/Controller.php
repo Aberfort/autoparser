@@ -17,59 +17,38 @@ class Controller {
 
 	public function menu(): void {
 
-		// Головна сторінка — список лент
 		add_menu_page(
-			'Autoparser',
-			'Autoparser',
+			__( 'Autoparser', 'autoparser' ),
+			__( 'Autoparser', 'autoparser' ),
 			'manage_options',
 			'autoparser',
-			array( $this, 'render_list' ),
+			array( $this, 'render_feeds' ),
 			'dashicons-rss',
 			65
 		);
 
-		// Окрема сторінка «Додати ленту» (можна відкривати напряму)
 		add_submenu_page(
 			'autoparser',
-			'Додати ленту',
-			'Додати ленту',
+			__( 'Ленти', 'autoparser' ),
+			__( 'Ленти', 'autoparser' ),
 			'manage_options',
-			'autoparser-add',
-			array( $this, 'render_add' )
-		);
-
-		add_submenu_page(
-			null,
-			'Редагувати ленту',
-			'Редагувати ленту',
-			'manage_options',
-			'autoparser-edit',
-			array( $this, 'render_edit' )
+			'autoparser',
+			array( $this, 'render_feeds' )
 		);
 
 		add_submenu_page(
 			'autoparser',
-			'Журнал',
-			'Журнал',
+			__( 'Активність', 'autoparser' ),
+			__( 'Активність', 'autoparser' ),
 			'manage_options',
-			'autoparser-log',
-			array( $this, 'render_log' )
+			'autoparser-activity',
+			array( $this, 'render_activity' )
 		);
 
 		add_submenu_page(
 			'autoparser',
-			'Розклад',
-			'Розклад',
-			'manage_options',
-			'autoparser-cron',
-			fn() => $this->wrapper( 'autoparser-root-cron' )
-		);
-
-		// Сторінка налаштувань
-		add_submenu_page(
-			'autoparser',
-			'Налаштування',
-			'Налаштування',
+			__( 'Налаштування', 'autoparser' ),
+			__( 'Налаштування', 'autoparser' ),
 			'manage_options',
 			'autoparser-settings',
 			array( $this, 'render_settings' )
@@ -114,23 +93,38 @@ class Controller {
 		echo '</div>';
 	}
 
-	public function render_list(): void {
-		$this->wrapper( 'autoparser-root-list' );
+	public function render_feeds(): void {
+		$this->wrapper( 'autoparser-root-feeds' );
 	}
 
-	public function render_add(): void {
-		$this->wrapper( 'autoparser-root-add' );
+	public function render_activity(): void {
+		$this->wrapper( 'autoparser-root-activity' );
 	}
 
 	public function render_settings(): void {
 		$this->wrapper( 'autoparser-root-settings' );
 	}
 
-	public function render_edit(): void {
-		$this->wrapper( 'autoparser-root-edit' );
-	}
+	/**
+	 * Dismissible notice on the plugin's own screens when no AI provider
+	 * key is configured yet — rewrite will fail on the first run otherwise.
+	 */
+	public function maybe_missing_api_key_notice(): void {
+		$screen = get_current_screen();
+		if ( ! $screen || ! str_contains( $screen->id, 'autoparser' ) ) {
+			return;
+		}
 
-	public function render_log(): void {
-		$this->wrapper( 'autoparser-root-log' );
+		$opts = get_option( 'autoparser_settings', array() );
+		if ( ! empty( $opts['gemini_api_key'] ) || ! empty( $opts['openai_api_key'] ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
+			esc_html__( 'Щоб рерайт статей працював, додайте ключ Gemini або OpenAI.', 'autoparser' ),
+			esc_url( admin_url( 'admin.php?page=autoparser-settings' ) ),
+			esc_html__( 'Перейти в налаштування', 'autoparser' )
+		);
 	}
 }

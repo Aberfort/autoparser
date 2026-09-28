@@ -1,5 +1,5 @@
 /* ==================================================================
- *  Autoparser – Ultra Glass UI v2.3
+ *  Autoparser – Native admin theme
  * ==================================================================*/
 
 @tailwind base;
@@ -8,65 +8,25 @@
 
 /* ---------- TOKENS ---------- */
 :root {
-  --autoparser-primary: #6c7bff;
-  --autoparser-primary-end: #8e5bff;
-  --autoparser-danger: #ff6464;
-  --autoparser-success: #34d399;
-  --autoparser-bg-card: hsla(0 0% 100%/.8);
-  --autoparser-bg-muted: #f3f4f7;
-  --autoparser-bg-page: #e5e7eb;
-  --autoparser-border: #d1d5db;
-  --autoparser-radius: 1rem;
-  --autoparser-glass-blur: 14px;
-  --autoparser-shadow-sm: 0 2px 6px rgba(0, 0, 0, .06);
-  --autoparser-shadow-md: 0 8px 24px rgba(0, 0, 0, .1);
-  --autoparser-speed: .25s;
-}
-
-@media(prefers-color-scheme: dark) {
-  :root {
-    --autoparser-primary: #8d9eff;
-    --autoparser-primary-end: #b08aff;
-    --autoparser-bg-card: hsla(217 32% 17%/.55);
-    --autoparser-bg-muted: #1e293b;
-    --autoparser-bg-page: #111827;
-    --autoparser-border: #334155;
-    --autoparser-shadow-md: 0 10px 28px rgba(0, 0, 0, .65);
-  }
+  --autoparser-primary: var(--wp-admin-theme-color, #2271b1);
+  --autoparser-primary-end: var(--wp-admin-theme-color-darker-10, #135e96);
+  --autoparser-danger: #d63638;
+  --autoparser-success: #00a32a;
+  --autoparser-bg-card: #fff;
+  --autoparser-bg-muted: #f6f7f7;
+  --autoparser-bg-page: #f0f0f1;
+  --autoparser-border: #dcdcde;
+  --autoparser-radius: .4rem;
+  --autoparser-shadow-sm: 0 1px 2px rgba(0, 0, 0, .06);
+  --autoparser-shadow-md: 0 1px 3px rgba(0, 0, 0, .08);
+  --autoparser-speed: .15s;
 }
 
 /* ---------- BASE BG ---------- */
 body.autoparser-admin {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(120deg, var(--autoparser-bg-page) 0%, var(--autoparser-bg-muted) 100%),
-  url("data:image/svg+xml,%3Csvg width='160' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
-  background-size: cover, 200px 200px;
-  color: #1f2937;
-}
-
-@media(prefers-color-scheme: dark) {
-  body.autoparser-admin {
-    color: #e2e8f0;
-  }
-}
-
-/* ---------- keyframes (fixed) ---------- */
-@keyframes float-y {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-@keyframes shine {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  background: var(--autoparser-bg-page);
+  color: #1d2327;
 }
 
 /* =================================================================
@@ -77,135 +37,105 @@ body.autoparser-admin {
   border-radius: var(--autoparser-radius);
   background: var(--autoparser-bg-card);
   border: 1px solid var(--autoparser-border);
-  box-shadow: var(--autoparser-shadow-md);
+  box-shadow: var(--autoparser-shadow-sm);
 }
 
 .autoparser-card__head {
   @apply flex items-center justify-between;
-  padding: 1.75rem 2.25rem;
-  color: #fff;
-  background: linear-gradient(145deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+  padding: 1.25rem 1.5rem;
+  color: #1d2327;
+  background: var(--autoparser-bg-card);
+  border-bottom: 1px solid var(--autoparser-border);
 }
 
 /* =================================================================
- *  BUTTONS (soft gradient, head-contrast shadow)
+ *  BUTTONS
  * =================================================================*/
 .autoparser-btn {
-  --bg1: var(--autoparser-primary);
-  --bg2: var(--autoparser-primary-end);
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: .45rem;
   font-weight: 600;
-  padding: .68rem 1.4rem;
-  border-radius: .8rem;
-  border: none;
+  padding: .55rem 1.1rem;
+  border-radius: .3rem;
+  border: 1px solid var(--autoparser-primary);
   color: #fff;
-  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .12);
-  transition: transform .18s, box-shadow .18s;
+  background: var(--autoparser-primary);
+  transition: background var(--autoparser-speed), color var(--autoparser-speed);
 }
 
 .autoparser-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, .14);
+  background: var(--autoparser-primary-end);
+  border-color: var(--autoparser-primary-end);
 }
 
-.autoparser-btn:active {
-  transform: none;
-  box-shadow: 0 3px 9px rgba(0, 0, 0, .16);
-}
-
-.autoparser-card__head .autoparser-btn {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
-}
-
-/* << */
 .autoparser-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(108, 123, 255, .45);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--autoparser-primary);
 }
 
 .autoparser-btn--secondary {
-  --bg1: #fff0;
-  --bg2: #fff0;
   color: var(--autoparser-primary);
-  border: 1px solid var(--autoparser-primary);
-  background: #0000;
+  border: 1px solid var(--autoparser-border);
+  background: #fff;
 }
 
 .autoparser-btn--secondary:hover {
-  background: linear-gradient(135deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
-  color: #fff;
+  background: var(--autoparser-bg-muted);
+  color: var(--autoparser-primary);
 }
 
 .autoparser-btn--danger {
-  --bg1: var(--autoparser-danger);
-  --bg2: #ff8989;
+  background: var(--autoparser-danger);
+  border-color: var(--autoparser-danger);
 }
 
 .autoparser-btn--icon {
-  width: 2.75rem;
-  height: 2.75rem;
-  padding: .55rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: .4rem;
 }
 
 /* =================================================================
- *  GLASS INPUT MIXIN
+ *  FORM INPUT MIXIN
  * =================================================================*/
-@mixin glass-input {
+@mixin form-input {
   width: 100%;
   font-size: .95rem;
-  padding: .7rem 1rem;
-  border-radius: .65rem;
+  padding: .55rem .8rem;
+  border-radius: .3rem;
   border: 1px solid var(--autoparser-border);
-  background: hsla(0 0% 100%/.7);
-  backdrop-filter: blur(8px);
-  transition: border var(--autoparser-speed), box-shadow var(--autoparser-speed), transform var(--autoparser-speed);
+  background: #fff;
+  transition: border var(--autoparser-speed), box-shadow var(--autoparser-speed);
   &::placeholder {
-    color: #9ca3af;
-    font-weight: 500;
+    color: #8c8f94;
   }
   &:focus {
     border-color: var(--autoparser-primary);
-    box-shadow: 0 0 0 3px rgba(108, 123, 255, .35);
+    box-shadow: 0 0 0 1px var(--autoparser-primary);
     outline: none;
   }
 }
 
-@media(prefers-color-scheme: dark) {
-  @mixin glass-input {
-    background: hsla(217 32% 17%/.5);
-  }
-}
-
-/* explicit */
 .autoparser-input {
-  @include glass-input;
+  @include form-input;
 }
 
 .autoparser-textarea {
-  @include glass-input;
+  @include form-input;
   resize: vertical;
   min-height: 7rem;
 }
 
 .autoparser-select {
-  @include glass-input;
-  padding-right: 2.8rem;
+  @include form-input;
+  padding-right: 2.4rem;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23888'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23555'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-size: 10px 6px;
-  background-position: right .9rem center;
-}
-
-@media(prefers-color-scheme: dark) {
-  .autoparser-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
-  }
+  background-position: right .8rem center;
 }
 
 /* =================================================================
@@ -227,12 +157,12 @@ select[multiple].autoparser-select option:checked {
 }
 
 /* =================================================================
- *  TOGGLE, BADGES, TABLE, HEADINGS  (без змін з v2.2)
+ *  TOGGLE, BADGES, TABLE, HEADINGS
  * =================================================================*/
 .autoparser-toggle {
   position: relative;
-  width: 48px;
-  height: 26px;
+  width: 40px;
+  height: 22px;
 }
 
 .autoparser-toggle input {
@@ -245,21 +175,20 @@ select[multiple].autoparser-select option:checked {
   position: absolute;
   inset: 0;
   border-radius: 999px;
-  background: #cbd5e1;
-  transition: background .25s;
+  background: #949494;
+  transition: background .2s;
 }
 
 .autoparser-toggle span::after {
   content: '';
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
-  transition: transform .25s;
+  transition: transform .2s;
 }
 
 .autoparser-toggle input:checked + span {
@@ -267,37 +196,33 @@ select[multiple].autoparser-select option:checked {
 }
 
 .autoparser-toggle input:checked + span::after {
-  transform: translateX(22px);
+  transform: translateX(18px);
 }
 
 .status-badge {
   display: inline-flex;
   gap: .25rem;
-  padding: .28rem .72rem;
+  padding: .22rem .65rem;
   border-radius: 999px;
   font-size: .73rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #fff;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
-  animation: float-y 4s ease infinite;
 }
 
 .status-badge--ok {
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  background: var(--autoparser-success);
 }
 
 .status-badge--error {
-  background: linear-gradient(135deg, #ff8a8a 0%, #ff6464 100%);
+  background: var(--autoparser-danger);
 }
 
 .status-badge--run {
-  background: linear-gradient(135deg, #9ba9ff 0%, #6c7bff 100%);
-  animation-duration: 2s;
+  background: var(--autoparser-primary);
 }
 
 .status-badge--pending {
-  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+  background: #8c8f94;
 }
 
 .autoparser-table {
@@ -307,43 +232,26 @@ select[multiple].autoparser-select option:checked {
 }
 
 .autoparser-table thead th {
-  top: 60px;
-  z-index: 20;
-  padding: .95rem 1rem;
-  background: var(--autoparser-bg-card);
-  backdrop-filter: blur(8px);
-  border-bottom: 2px solid var(--autoparser-border);
-  font-weight: 700;
+  padding: .85rem 1rem;
+  background: var(--autoparser-bg-muted);
+  border-bottom: 1px solid var(--autoparser-border);
+  font-weight: 600;
   font-size: .78rem;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: .02em;
   text-align: left;
 }
 
 .autoparser-table tbody tr {
-  transition: background .18s, transform .18s;
-}
-
-.autoparser-table tbody tr:nth-child(odd) {
-  background: rgba(0, 0, 0, .02);
+  border-bottom: 1px solid var(--autoparser-border);
 }
 
 .autoparser-table tbody tr:hover {
-  background: hsla(232 50% 94%/.6);
-  transform: scale(1.005);
-}
-
-@media(prefers-color-scheme: dark) {
-  .autoparser-table tbody tr:nth-child(odd) {
-    background: rgba(255, 255, 255, .02);
-  }
-  .autoparser-table tbody tr:hover {
-    background: hsla(217 32% 20%/.6);
-  }
+  background: var(--autoparser-bg-muted);
 }
 
 .autoparser-table td {
-  padding: .85rem 1rem;
+  padding: .75rem 1rem;
 }
 
 .autoparser-table--log {
@@ -357,21 +265,57 @@ select[multiple].autoparser-select option:checked {
   white-space: nowrap;
 }
 
-h2.text-3xl, h2.text-2xl, .autoparser-card__head h2 {
-  position: relative;
+/* =================================================================
+ *  EMPTY STATE
+ * =================================================================*/
+.autoparser-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #646970;
 }
 
-h2.text-3xl::after, h2.text-2xl::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 60px;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--autoparser-primary) 0%, var(--autoparser-primary-end) 100%);
-  background-size: 200% 100%;
-  animation: shine 3s linear infinite;
+.autoparser-empty__icon {
+  font-size: 2.5rem;
+  margin-bottom: .5rem;
+}
+
+.autoparser-empty__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1d2327;
+  margin-bottom: .25rem;
+}
+
+.autoparser-empty__hint {
+  margin-bottom: 1rem;
+}
+
+/* =================================================================
+ *  TABS (Активність: Журнал / Розклад)
+ * =================================================================*/
+.autoparser-tabs {
+  display: flex;
+  gap: .25rem;
+  border-bottom: 1px solid var(--autoparser-border);
+}
+
+.autoparser-tab {
+  padding: .65rem 1.1rem;
+  font-weight: 600;
+  color: #50575e;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.autoparser-tab:hover {
+  color: var(--autoparser-primary);
+}
+
+.autoparser-tab.is-active {
+  color: var(--autoparser-primary);
+  border-bottom-color: var(--autoparser-primary);
 }
 
 /* =================================================================
@@ -396,7 +340,7 @@ h2.text-3xl::after, h2.text-2xl::after {
   font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: .4rem;
-  color: var(--autoparser-primary);
+  color: #1d2327;
 }
 
 .autoparser-label {
@@ -405,6 +349,10 @@ h2.text-3xl::after, h2.text-2xl::after {
   gap: .45rem;
   font-weight: 600;
   color: inherit;
+}
+
+.autoparser-help {
+  font-weight: 400;
 }
 
 /* =================================================================
@@ -423,14 +371,14 @@ h2.text-3xl::after, h2.text-2xl::after {
   input.components-text-control__input.autoparser-input,
   input.components-number-control__input.autoparser-input,
   .wp-core-ui input.autoparser-input {
-    @include glass-input;
+    @include form-input;
   }
 
   textarea.autoparser-textarea,
   textarea.components-textarea-control__input.autoparser-textarea,
   .wp-core-ui textarea.autoparser-textarea {
     all: unset;
-    @include glass-input;
+    @include form-input;
     resize: vertical;
     min-height: 7rem;
   }
@@ -439,21 +387,13 @@ h2.text-3xl::after, h2.text-2xl::after {
   select.components-select-control__input.autoparser-select,
   .wp-core-ui select.autoparser-select {
     all: unset;
-    @include glass-input;
-    padding-right: 2.8rem;
+    @include form-input;
+    padding-right: 2.4rem;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23888'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23555'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-size: 10px 6px;
-    background-position: right .9rem center;
-  }
-
-  @media(prefers-color-scheme: dark) {
-    select.autoparser-select,
-    select.components-select-control__input.autoparser-select,
-    .wp-core-ui select.autoparser-select {
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='14' height='8' fill='%23bbb'%3e%3cpath d='M1 1l6 6 6-6'%/%3e%3c/svg%3e");
-    }
+    background-position: right .8rem center;
   }
 
   .components-base-control__field .components-toggle-control__label {
@@ -463,7 +403,7 @@ h2.text-3xl::after, h2.text-2xl::after {
 }
 
 /* =================================================================
- *  Extra styles for LogTable badges & long messages
+ *  LogTable level badges
  * =================================================================*/
 .log-badge {
   @apply inline-flex items-center justify-center;
@@ -474,22 +414,20 @@ h2.text-3xl::after, h2.text-2xl::after {
   letter-spacing: .03em;
   color: #fff;
   white-space: nowrap;
-  backdrop-filter: blur(6px);
 }
 
 .log-badge--info {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  background: #2271b1;
 }
 
 .log-badge--warning {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: #b26200;
 }
 
 .log-badge--error {
-  background: linear-gradient(135deg, #ff8a8a 0%, #ff6464 100%);
+  background: var(--autoparser-danger);
 }
 
-/* prevent long log JSON from stretching row height */
 .autoparser-table--log td {
   vertical-align: top;
   padding-top: .6rem;
@@ -497,28 +435,12 @@ h2.text-3xl::after, h2.text-2xl::after {
   line-height: 1.35;
 }
 
-/* optional: thin custom scrollbar inside log card */
 .autoparser-card::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 
 .autoparser-card::-webkit-scrollbar-thumb {
-  background: var(--autoparser-primary-end);
+  background: var(--autoparser-border);
   border-radius: 4px;
-}
-
-
-/* =================================================================
- *  AUTOFILL fix
- * =================================================================*/
-input.autoparser-input:-webkit-autofill {
-  box-shadow: 0 0 0 1000px hsla(0, 0%, 100%, .7) inset !important;
-  -webkit-text-fill-color: inherit !important;
-}
-
-@media(prefers-color-scheme: dark) {
-  input.autoparser-input:-webkit-autofill {
-    box-shadow: 0 0 0 1000px hsla(217 32% 17%/.55) inset !important;
-  }
 }

@@ -32,8 +32,10 @@ const AIPostBadge = () => (
 );
 
 export default function FeedFormShared({
-                                           feedId = null, onSuccess = () => {
-    }
+                                           feedId = null,
+                                           onSuccess = () => {
+                                           },
+                                           onBack = null,
                                        }) {
 
     /* ───────── state ───────── */
@@ -164,7 +166,7 @@ export default function FeedFormShared({
         })
             .then(() => {
                 setSaved(true);
-                onSuccess();
+                setTimeout(onSuccess, 700);
             })
             .finally(() => setSaving(false));
     };
@@ -190,10 +192,17 @@ export default function FeedFormShared({
 
                 {/* header */}
                 <header className="autoparser-card__head">
-                    <h2 className="text-2xl font-semibold tracking-wide">
-                        {feedId ? __('Редагування ленти', 'autoparser') : __('Нова лента', 'autoparser')}
-                        {feedId && ` #${feedId}`}
-                    </h2>
+                    <div className="flex items-center gap-4">
+                        {onBack && (
+                            <Button className="autoparser-btn autoparser-btn--secondary" onClick={onBack}>
+                                {__('← Назад до списку', 'autoparser')}
+                            </Button>
+                        )}
+                        <h2 className="text-2xl font-semibold tracking-wide">
+                            {feedId ? __('Редагування ленти', 'autoparser') : __('Нова лента', 'autoparser')}
+                            {feedId && ` #${feedId}`}
+                        </h2>
+                    </div>
 
                     {feedId &&
                         <Tooltip text={__('Запустити зараз', 'autoparser')}>
@@ -259,6 +268,9 @@ export default function FeedFormShared({
                                 checked={form.predict_only}
                                 onChange={e => update('predict_only', e.target.checked)}
                             />
+                            <small className="autoparser-help text-gray-500">
+                                {__('Потребує увімкненого модуля AI-прогнозів у Налаштуваннях.', 'autoparser')}
+                            </small>
                         </label>
 
                         {/* CSS-selector (прихований, якщо AI-постинг) */}
