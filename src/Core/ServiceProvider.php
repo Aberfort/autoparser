@@ -22,6 +22,7 @@ use AutoParser\Parser\ParserService;
 use AutoParser\Publisher\GutenbergPublisher;
 use AutoParser\Cron\Scheduler;
 use AutoParser\CLI\RunCommand;
+use AutoParser\CLI\TestSelectorCommand;
 use AutoParser\AI\ProviderFactory;
 
 class ServiceProvider implements ServiceProviderInterface {
@@ -127,6 +128,10 @@ class ServiceProvider implements ServiceProviderInterface {
 			\WP_CLI::add_command(
 				'autoparser run',
 				new RunCommand( $c['parser.service'] )
+			);
+			\WP_CLI::add_command(
+				'autoparser test-selector',
+				new TestSelectorCommand( $c['parser.service'] )
 			);
 		}
 

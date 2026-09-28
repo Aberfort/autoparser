@@ -26,6 +26,58 @@ class FeedRunController extends WP_REST_Controller {
 				'permission_callback' => fn() => current_user_can( 'manage_options' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			"/{$this->rest_base}/preview",
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'preview' ),
+				'permission_callback' => fn() => current_user_can( 'manage_options' ),
+				'args'                => array(
+					'url'          => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'esc_url_raw',
+					),
+					'selector'     => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'selector_end' => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Dry-run: fetch a URL and show what a selector would extract,
+	 * without saving anything, publishing, or calling the AI provider.
+	 * Lets an admin check a selector before creating/editing a feed.
+	 */
+	public function preview( $req ) {
+		try {
+			$result = $this->parser->previewExtract(
+				(string) $req->get_param( 'url' ),
+				(string) $req->get_param( 'selector' ),
+				$req->get_param( 'selector_end' ) ?: null
+			);
+		} catch ( \Throwable $e ) {
+			return new \WP_Error( 'preview_failed', $e->getMessage(), array( 'status' => 422 ) );
+		}
+
+		// Never return raw scraped HTML to the browser — it's third-party
+		// content the admin's browser has no reason to trust or render.
+		return rest_ensure_response(
+			array(
+				'title'           => $result['title'],
+				'content_excerpt' => wp_trim_words( wp_strip_all_tags( $result['content'] ), 80, '…' ),
+				'content_length'  => $result['content_length'],
+			)
+		);
 	}
 
 	public function run( $req ) {

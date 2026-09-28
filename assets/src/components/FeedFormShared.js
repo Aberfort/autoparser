@@ -48,7 +48,29 @@ export default function FeedFormShared({
     const [saved, setSaved] = useState(false);
     const [running, setRun] = useState(false);
 
+    const [preview, setPreview] = useState(null);
+    const [previewError, setPreviewError] = useState(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+
     const update = (k, v) => setForm(prev => ({...prev, [k]: v}));
+
+    const testSelector = () => {
+        setPreviewLoading(true);
+        setPreviewError(null);
+        setPreview(null);
+        apiFetch({
+            path: '/autoparser/v1/feeds/preview',
+            method: 'POST',
+            data: {
+                url: form.url,
+                selector: form.selector,
+                selector_end: form.selector_end,
+            },
+        })
+            .then(setPreview)
+            .catch(err => setPreviewError(err.message || __('Не вдалося отримати вміст за цим URL/селектором.', 'autoparser')))
+            .finally(() => setPreviewLoading(false));
+    };
 
     /* ───────── load options ───────── */
     useEffect(() => {
@@ -279,6 +301,34 @@ export default function FeedFormShared({
                                 CSS-селектори (start/end)
                                 <input className="autoparser-input" value={form.selector} onChange={e => update('selector', e.target.value)}/>
                                 <input className="autoparser-input" value={form.selector_end} onChange={e => update('selector_end', e.target.value)}/>
+                                <small className="autoparser-help text-gray-500">
+                                    {__('Необов\'язково — якщо селектор порожній або не знайдений, плагін спробує типові варіанти (article, main, .entry-content…) автоматично.', 'autoparser')}
+                                </small>
+
+                                <Button
+                                    type="button"
+                                    className="autoparser-btn autoparser-btn--secondary"
+                                    disabled={!form.url || previewLoading}
+                                    onClick={testSelector}
+                                >
+                                    {previewLoading ? <Spinner/> : __('Перевірити селектор', 'autoparser')}
+                                </Button>
+
+                                {previewError && (
+                                    <Notice status="error" isDismissible onRemove={() => setPreviewError(null)}>
+                                        {previewError}
+                                    </Notice>
+                                )}
+
+                                {preview && (
+                                    <div className="autoparser-card p-4 space-y-2">
+                                        <p><strong>{__('Заголовок', 'autoparser')}:</strong> {preview.title || '—'}</p>
+                                        <p><strong>{__('Довжина контенту', 'autoparser')}:</strong> {preview.content_length} {__('символів', 'autoparser')}</p>
+                                        <p className="autoparser-help text-gray-500 max-h-40 overflow-auto">
+                                            {preview.content_excerpt}
+                                        </p>
+                                    </div>
+                                )}
                             </label>
                         }
 

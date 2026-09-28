@@ -75,6 +75,37 @@ PROMPT;
 		}
 	}
 
+	/**
+	 * Dry-run: fetch a URL and extract content the same way a real feed
+	 * run would (including the fallback-selector chain), without any AI
+	 * rewrite, publishing, or dedup side effects. Used by the REST
+	 * preview endpoint and the WP-CLI test-selector command, so a
+	 * selector can be checked before a feed is even saved.
+	 *
+	 * @return array{title: string, content: string, content_length: int}
+	 * @throws \RuntimeException On fetch failure, or if no content
+	 *                           selector could be resolved.
+	 */
+	public function previewExtract( string $url, string $selector = '', ?string $selectorEnd = null ): array {
+		$html = (string) $this->http->get(
+			$url,
+			array(
+				'headers' => array( 'User-Agent' => \AutoParser\Core\Helpers::random_ua() ),
+				'timeout' => 15,
+			)
+		)->getBody();
+
+		$crawler = new Crawler( $html );
+		$content = $this->extractBoundedContent( $crawler, $selector, $selectorEnd );
+		$title   = $crawler->filter( 'title' )->text( '' );
+
+		return array(
+			'title'          => $title,
+			'content'        => $content,
+			'content_length' => mb_strlen( wp_strip_all_tags( $content ) ),
+		);
+	}
+
 	/* ================= INTERNAL ================= */
 
 	private function run_feed( Feed $feed ): void {
@@ -463,17 +494,27 @@ PROMPT;
 
 	/* ---------- helpers ---------- */
 
+	/**
+	 * Selectors tried, in order, when the feed's own selector is empty or
+	 * not found on the page — covers most WordPress/news themes so a feed
+	 * doesn't hard-require knowing the right CSS selector up front.
+	 */
+	private const FALLBACK_CONTENT_SELECTORS = array(
+		'article',
+		'main',
+		'.entry-content',
+		'.post-content',
+		'.content',
+		'#content',
+		'body',
+	);
+
 	private function extractBoundedContent(
 		Crawler $crawler,
 		string $startSelector,
 		?string $endSelector = null
 	): string {
-		$startNode = $crawler->filter( $startSelector )->first();
-		if ( $startNode->count() === 0 ) {
-			throw new \RuntimeException(
-				"Start selector not found: {$startSelector}"
-			);
-		}
+		$startNode = $this->findStartNode( $crawler, $startSelector );
 
 		if ( empty( $endSelector ) ) {
 			return $startNode->html();
@@ -494,6 +535,37 @@ PROMPT;
 		}
 
 		return $html;
+	}
+
+	/**
+	 * Finds the content start node: the feed's configured selector if it
+	 * matches, otherwise the first of FALLBACK_CONTENT_SELECTORS to match
+	 * (ending in 'body', which always matches valid HTML).
+	 *
+	 * @throws \RuntimeException Only if the configured selector is set but
+	 *                           not found, and even 'body' is missing (i.e.
+	 *                           $html isn't a parseable HTML document).
+	 */
+	private function findStartNode( Crawler $crawler, string $startSelector ): Crawler {
+		if ( '' !== $startSelector ) {
+			$node = $crawler->filter( $startSelector )->first();
+			if ( $node->count() > 0 ) {
+				return $node;
+			}
+		}
+
+		foreach ( self::FALLBACK_CONTENT_SELECTORS as $fallback ) {
+			$node = $crawler->filter( $fallback )->first();
+			if ( $node->count() > 0 ) {
+				return $node;
+			}
+		}
+
+		throw new \RuntimeException(
+			'' !== $startSelector
+				? "Start selector not found: {$startSelector}"
+				: 'No content selector configured and automatic detection failed.'
+		);
 	}
 
 	/*
