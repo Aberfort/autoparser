@@ -17,7 +17,7 @@ class Migrator {
 
 	public function __construct(
 		private FeedRepository $feeds,
-		private PostMapRepository $postMap
+		private PostMapRepository $post_map
 	) {
 	}
 
@@ -27,7 +27,7 @@ class Migrator {
 		}
 
 		$this->feeds->create_table();
-		$this->postMap->create_table();
+		$this->post_map->create_table();
 
 		update_option( 'autoparser_db_version', AUTOPARSER_DB_VERSION );
 	}

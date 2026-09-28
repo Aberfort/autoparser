@@ -8,13 +8,13 @@ use AutoParser\AI\Contract\ProviderInterface;
 class OpenAIProvider implements ProviderInterface {
 
 	public function __construct(
-		private string $apiKey,
+		private string $api_key,
 		private string $model = 'gpt-4o-mini'
 	) {
 	}
 
 	public function rewrite( string $text, string $prompt ): string {
-		$chat = OpenAI::client( $this->apiKey )->chat();
+		$chat = OpenAI::client( $this->api_key )->chat();
 		$resp = $chat->create(
 			array(
 				'model'       => $this->model,
@@ -36,7 +36,7 @@ class OpenAIProvider implements ProviderInterface {
 	}
 
 	public function forecast( string $prompt, array $extra = array() ): string {
-		$chat = OpenAI::client( $this->apiKey )->chat();
+		$chat = OpenAI::client( $this->api_key )->chat();
 		$resp = $chat->create(
 			array(
 				'model'       => $this->model,

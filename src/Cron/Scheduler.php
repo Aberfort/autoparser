@@ -35,18 +35,18 @@ class Scheduler {
 			return;
 		}
 
-		$timeParts = explode( ':', $feed->post_time );
-		$firstRun  = mktime( (int) $timeParts[0], (int) $timeParts[1], 0 );
+		$time_parts = explode( ':', $feed->post_time );
+		$first_run  = mktime( (int) $time_parts[0], (int) $time_parts[1], 0 );
 
-		if ( $firstRun <= time() ) {
-			$firstRun += DAY_IN_SECONDS;
+		if ( $first_run <= time() ) {
+			$first_run += DAY_IN_SECONDS;
 		}
 
 		$interval = DAY_IN_SECONDS;
 
 		if ( function_exists( 'as_schedule_recurring_action' ) ) {
 			as_schedule_recurring_action(
-				$firstRun,
+				$first_run,
 				$interval,
 				'autoparser_run_feed',
 				array( $feed->id ),

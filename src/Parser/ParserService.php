@@ -51,7 +51,7 @@ PROMPT;
 		private PostMapRepository $maps,
 		private FixturesService $fixtures,
 		private GutenbergPublisher $publisher,
-		private ForecastPublisher $forecastPublisher,
+		private ForecastPublisher $forecast_publisher,
 		private Client $http,
 		private Logger $log,
 		private UsageTracker $usage,
@@ -86,7 +86,7 @@ PROMPT;
 	 * @throws \RuntimeException On fetch failure, or if no content
 	 *                           selector could be resolved.
 	 */
-	public function previewExtract( string $url, string $selector = '', ?string $selectorEnd = null ): array {
+	public function preview_extract( string $url, string $selector = '', ?string $selector_end = null ): array {
 		$html = (string) $this->http->get(
 			$url,
 			array(
@@ -96,7 +96,7 @@ PROMPT;
 		)->getBody();
 
 		$crawler = new Crawler( $html );
-		$content = $this->extractBoundedContent( $crawler, $selector, $selectorEnd );
+		$content = $this->extract_bounded_content( $crawler, $selector, $selector_end );
 		$title   = $crawler->filter( 'title' )->text( '' );
 
 		return array(
@@ -150,9 +150,9 @@ PROMPT;
 			/*
 			Import only items newer than last_ts,             *
 			 *   except those whose previous post is deleted.   */
-			$cutOff = (int) $feed->last_ts;
+			$cut_off = (int) $feed->last_ts;
 
-			$result = $this->handle_rss( $feed, $rewriter, $cutOff );
+			$result = $this->handle_rss( $feed, $rewriter, $cut_off );
 		}
 
 		/**
@@ -184,7 +184,7 @@ PROMPT;
 		Feed $feed,
 		DynamicPredict $predictor
 	): array {
-		$rows = $this->fixtures->todayTop( $feed->limit );
+		$rows = $this->fixtures->today_top( $feed->limit );
 
 		if ( ! $rows ) {
 			$this->feeds->update_status(
@@ -202,21 +202,21 @@ PROMPT;
 		$posted = 0;
 
 		foreach ( $rows as $row ) {
-			$team1    = $row['team1'];
-			$team2    = $row['team2'];
-			$dateTime = $row['datetime'];          // «20.05.2025 22:00»
-			$league   = $row['league'];
+			$team1     = $row['team1'];
+			$team2     = $row['team2'];
+			$date_time = $row['datetime'];          // «20.05.2025 22:00»
+			$league    = $row['league'];
 
-			$matchStamp = ( new \DateTimeImmutable( $dateTime ) )
+			$match_stamp = ( new \DateTimeImmutable( $date_time ) )
 				->format( 'Ymd' );
-			$virtualUrl = sprintf(
+			$virtual_url = sprintf(
 				'match://%s-%s-%s',
 				sanitize_title( $team1 ),
 				sanitize_title( $team2 ),
-				$matchStamp
+				$match_stamp
 			);
-			$virtualUrl = UrlCanonicalizer::normalize( $virtualUrl );
-			if ( $this->maps->exists( (int) $feed->id, $virtualUrl ) ) {
+			$virtual_url = UrlCanonicalizer::normalize( $virtual_url );
+			if ( $this->maps->exists( (int) $feed->id, $virtual_url ) ) {
 				continue;
 			}
 
@@ -226,8 +226,8 @@ PROMPT;
 				array(
 					'{{team1}}'    => $team1,
 					'{{team2}}'    => $team2,
-					'{{time}}'     => date( 'H:i', strtotime( $dateTime ) ),
-					'{{datetime}}' => $dateTime,
+					'{{time}}'     => date( 'H:i', strtotime( $date_time ) ),
+					'{{datetime}}' => $date_time,
 					'{{league}}'   => $league,
 					'{{date}}'     => wp_date( 'd.m.Y' ),
 					'{{teams}}'    => "$team1 vs $team2",
@@ -244,7 +244,7 @@ PROMPT;
 			$prompt = apply_filters( 'autoparser_rewrite_prompt', $prompt, $feed, 'forecast' );
 
 			try {
-				$html = $predictor->getForecast( $prompt, array() );
+				$html = $predictor->get_forecast( $prompt, array() );
 				$this->usage->record( $feed->ai_provider ?: 'gemini', 'forecast' );
 			} catch ( \Throwable $e ) {
 				$this->log->warning(
@@ -254,16 +254,16 @@ PROMPT;
 				continue;
 			}
 
-			$post_id = $this->forecastPublisher->publish(
+			$post_id = $this->forecast_publisher->publish(
 				$feed,
 				$team1,
 				$team2,
-				$dateTime,
+				$date_time,
 				$html,
-				"$team1 vs $team2, $dateTime, $league"
+				"$team1 vs $team2, $date_time, $league"
 			);
 
-			$this->maps->add( $feed->id, $virtualUrl, $post_id );
+			$this->maps->add( $feed->id, $virtual_url, $post_id );
 
 			++$posted;
 			$this->log->info( "✅ Forecast #$post_id", array( 'feed_id' => $feed->id ) );
@@ -294,16 +294,16 @@ PROMPT;
 	private function handle_rss(
 		Feed $feed,
 		DynamicRewrite $rewriter,
-		int $cutOff
+		int $cut_off
 	): array {
-		$rows     = $this->discover_urls( $feed, $cutOff );   // already limited
-		$posted   = 0;
-		$maxTsNew = 0;                                    // track newest ts
+		$rows       = $this->discover_urls( $feed, $cut_off );   // already limited
+		$posted     = 0;
+		$max_ts_new = 0;                                    // track newest ts
 
 		foreach ( $rows as $row ) {
-			$url    = UrlCanonicalizer::normalize( $row['link'] );
-			$rssImg = $row['img'];
-			$ts     = (int) $row['ts'];
+			$url     = UrlCanonicalizer::normalize( $row['link'] );
+			$rss_img = $row['img'];
+			$ts      = (int) $row['ts'];
 
 			/* Skip duplicates (alive posts) */
 			if ( $this->maps->exists( (int) $feed->id, $url ) ) {
@@ -343,7 +343,7 @@ PROMPT;
 				$html = (string) $this->http->get( $url, $http_options )->getBody();
 
 				$crawler = new Crawler( $html );
-				$content = $this->extractBoundedContent(
+				$content = $this->extract_bounded_content(
 					$crawler,
 					$feed->selector,
 					$feed->selector_end
@@ -358,42 +358,42 @@ PROMPT;
 				 */
 				$content = apply_filters( 'autoparser_extracted_content', $content, $feed, $crawler );
 
-				$titleOriginal = $crawler->filter( 'title' )->text( '' );
-				$teams         = $this->parse_teams_from_title( $titleOriginal );
+				$title_original = $crawler->filter( 'title' )->text( '' );
+				$teams          = $this->parse_teams_from_title( $title_original );
 
 				/* Local prompt */
-				$rawPrompt                  = (string) $feed->prompt;
-				[$titlePrompt, $bodyPrompt] =
-					array_pad( explode( '---', $rawPrompt, 2 ), 2, '' );
+				$raw_prompt                   = (string) $feed->prompt;
+				[$title_prompt, $body_prompt] =
+					array_pad( explode( '---', $raw_prompt, 2 ), 2, '' );
 
-				$titlePrompt = trim( $titlePrompt )
+				$title_prompt = trim( $title_prompt )
 					?: 'Перепиши цей заголовок унікально, зберігши мову та зміст.';
-				$bodyPrompt  = trim( $bodyPrompt );
+				$body_prompt  = trim( $body_prompt );
 
 				/** @see handle_ai_predictions() for the filter doc. */
-				$titlePrompt = apply_filters( 'autoparser_rewrite_prompt', $titlePrompt, $feed, 'title' );
-				$bodyPrompt  = apply_filters( 'autoparser_rewrite_prompt', $bodyPrompt, $feed, 'body' );
+				$title_prompt = apply_filters( 'autoparser_rewrite_prompt', $title_prompt, $feed, 'title' );
+				$body_prompt  = apply_filters( 'autoparser_rewrite_prompt', $body_prompt, $feed, 'body' );
 
-				$title = trim( $rewriter->rewrite( $titleOriginal, $titlePrompt ) )
-					?: $titleOriginal;
+				$title = trim( $rewriter->rewrite( $title_original, $title_prompt ) )
+					?: $title_original;
 
-				$rewritten = $bodyPrompt
-					? $rewriter->rewrite( $content, $bodyPrompt )
+				$rewritten = $body_prompt
+					? $rewriter->rewrite( $content, $body_prompt )
 					: $content;
 
 				$this->usage->record( $feed->ai_provider ?: 'gemini', 'rewrite' );
 
 				/* Thumbnail */
-				$thumbId = null;
+				$thumb_id = null;
 				if ( $feed->thumbnail_mode === 'first' ) {
-					if ( $rssImg ) {
-						$thumbId = \AutoParser\Core\Helpers::sideload_image(
-							$rssImg,
+					if ( $rss_img ) {
+						$thumb_id = \AutoParser\Core\Helpers::sideload_image(
+							$rss_img,
 							$feed->image_dir
 						);
 					}
-					if ( ! $thumbId ) {
-						$thumbId = $this->extract_first_image(
+					if ( ! $thumb_id ) {
+						$thumb_id = $this->extract_first_image(
 							$crawler,
 							$feed->image_dir
 						);
@@ -413,7 +413,7 @@ PROMPT;
 						$teams
 					);
 
-					$post_id = $this->forecastPublisher->publish(
+					$post_id = $this->forecast_publisher->publish(
 						$feed,
 						$team1,
 						$team2,
@@ -429,8 +429,8 @@ PROMPT;
 					);
 				}
 
-				if ( $thumbId ) {
-					set_post_thumbnail( $post_id, $thumbId );
+				if ( $thumb_id ) {
+					set_post_thumbnail( $post_id, $thumb_id );
 				}
 
 				/* Map + log */
@@ -442,13 +442,13 @@ PROMPT;
 						'feed_id'   => $feed->id,
 						'post_id'   => $post_id,
 						'url'       => $url,
-						'thumb'     => $thumbId ? 'set' : 'none',
-						'thumb_src' => $thumbId && $rssImg ? 'RSS'
-							: ( $thumbId ? 'HTML' : '-' ),
+						'thumb'     => $thumb_id ? 'set' : 'none',
+						'thumb_src' => $thumb_id && $rss_img ? 'RSS'
+							: ( $thumb_id ? 'HTML' : '-' ),
 					)
 				);
 
-				$maxTsNew = max( $maxTsNew, $ts );
+				$max_ts_new = max( $max_ts_new, $ts );
 				++$posted;
 			} catch ( \Throwable $e ) {
 				$this->feeds->update_status(
@@ -468,8 +468,8 @@ PROMPT;
 		/* Persist newest timestamp */
 
 		/* Persist newest timestamp – only if we really saw a dated, newer item */
-		if ( $maxTsNew > $cutOff ) {
-			$this->feeds->update_last_ts( $feed->id, $maxTsNew );
+		if ( $max_ts_new > $cut_off ) {
+			$this->feeds->update_last_ts( $feed->id, $max_ts_new );
 		}
 
 		$msg = $posted
@@ -512,29 +512,30 @@ PROMPT;
 		'body',
 	);
 
-	private function extractBoundedContent(
+	private function extract_bounded_content(
 		Crawler $crawler,
-		string $startSelector,
-		?string $endSelector = null
+		string $start_selector,
+		?string $end_selector = null
 	): string {
-		$startNode = $this->findStartNode( $crawler, $startSelector );
+		$start_node = $this->find_start_node( $crawler, $start_selector );
 
-		if ( empty( $endSelector ) ) {
-			return $startNode->html();
+		if ( empty( $end_selector ) ) {
+			return $start_node->html();
 		}
 
 		$html     = '';
 		$document = $crawler->getNode( 0 )->ownerDocument;
-		$node     = $startNode->getNode( 0 );
+		$node     = $start_node->getNode( 0 );
 
 		while ( $node ) {
-			if ( ( new Crawler( $node ) )->filter( $endSelector )->count() > 0
-				&& $node !== $startNode->getNode( 0 ) ) {
+			if ( ( new Crawler( $node ) )->filter( $end_selector )->count() > 0
+				&& $node !== $start_node->getNode( 0 ) ) {
 				break;
 			}
 
 			$html .= $document->saveHTML( $node );
-			$node  = $node->nextSibling;
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- native DOMNode property, not ours to rename.
+			$node = $node->nextSibling;
 		}
 
 		return $html;
@@ -549,9 +550,9 @@ PROMPT;
 	 *                           not found, and even 'body' is missing (i.e.
 	 *                           $html isn't a parseable HTML document).
 	 */
-	private function findStartNode( Crawler $crawler, string $startSelector ): Crawler {
-		if ( '' !== $startSelector ) {
-			$node = $crawler->filter( $startSelector )->first();
+	private function find_start_node( Crawler $crawler, string $start_selector ): Crawler {
+		if ( '' !== $start_selector ) {
+			$node = $crawler->filter( $start_selector )->first();
 			if ( $node->count() > 0 ) {
 				return $node;
 			}
@@ -565,8 +566,8 @@ PROMPT;
 		}
 
 		throw new \RuntimeException(
-			'' !== $startSelector
-				? "Start selector not found: {$startSelector}"
+			'' !== $start_selector
+				? "Start selector not found: {$start_selector}"
 				: 'No content selector configured and automatic detection failed.'
 		);
 	}
@@ -576,22 +577,22 @@ PROMPT;
 	 * its previously-imported post was since deleted. Pure/static and
 	 * shared by discover_from_urlset() and discover_from_rss() (it used
 	 * to be copy-pasted in both) so it can be unit-tested without a
-	 * database or WordPress runtime — see tests/Unit/ParserServiceTest.php.
+	 * database or WordPress runtime — see tests/Unit/ParserServiceRecencyTest.php.
 	 *
-	 * @param bool $wasDeleted TRUE if a mapping exists but the post is gone/trashed.
-	 * @param int  $ts         Item's timestamp, or 0 if it has none.
-	 * @param int  $cutOff     Feed's last-seen timestamp ($feed->last_ts), or 0 on first import.
+	 * @param bool $was_deleted TRUE if a mapping exists but the post is gone/trashed.
+	 * @param int  $ts          Item's timestamp, or 0 if it has none.
+	 * @param int  $cut_off     Feed's last-seen timestamp ($feed->last_ts), or 0 on first import.
 	 */
-	public static function shouldIncludeByRecency( bool $wasDeleted, int $ts, int $cutOff ): bool {
-		if ( $wasDeleted ) {
+	public static function should_include_by_recency( bool $was_deleted, int $ts, int $cut_off ): bool {
+		if ( $was_deleted ) {
 			return true;
 		}
 
-		if ( $ts > 0 && $ts > $cutOff ) {
+		if ( $ts > 0 && $ts > $cut_off ) {
 			return true;
 		}
 
-		return 0 === $ts && 0 === $cutOff;
+		return 0 === $ts && 0 === $cut_off;
 	}
 
 	/*
@@ -599,20 +600,20 @@ PROMPT;
 	 *  URL-discoverer  (RSS + XML-sitemap + sitemapindex)
 	 * =====================================================================*/
 
-	private function discover_urls( Feed $feed, int $cutOff ): array {
+	private function discover_urls( Feed $feed, int $cut_off ): array {
 		try {
-			$raw = $this->fetchRss( $feed->url );
+			$raw = $this->fetch_rss( $feed->url );
 			$xml = new \SimpleXMLElement( $raw );
 
 			return match ( $xml->getName() ) {
-				'rss', 'feed' => $this->discover_from_rss( $xml, $feed, $cutOff ),
-				'urlset' => $this->discover_from_urlset( $xml, $feed, $cutOff ),
+				'rss', 'feed' => $this->discover_from_rss( $xml, $feed, $cut_off ),
+				'urlset' => $this->discover_from_urlset( $xml, $feed, $cut_off ),
 				'sitemapindex' => $this->discover_from_index(
 					$xml,
 					$feed,
-					$cutOff
+					$cut_off
 				),
-				default => $this->logUnknownRoot( $xml->getName(), $feed ),
+				default => $this->log_unknown_root( $xml->getName(), $feed ),
 			};
 		} catch ( \Throwable $e ) {
 			$this->log->error(
@@ -632,26 +633,26 @@ PROMPT;
 	private function discover_from_urlset(
 		\SimpleXMLElement $set,
 		Feed $feed,
-		int $cutOff
+		int $cut_off
 	): array {
 		$ns   = $set->getNamespaces( true )[''] ?? '';
 		$urls = $ns ? $set->children( $ns )->url : $set->url;
 
 		$out = array();
 		foreach ( $urls as $u ) {
-			$rawDate = (string) $u->lastmod;
-			$ts      = $rawDate ? strtotime( $rawDate ) : 0;
+			$raw_date = (string) $u->lastmod;
+			$ts       = $raw_date ? strtotime( $raw_date ) : 0;
 
 			$link = UrlCanonicalizer::normalize( (string) $u->loc );
 
-			$wasDeleted = $this->maps->isDeleted( (int) $feed->id, $link );
+			$was_deleted = $this->maps->is_deleted( (int) $feed->id, $link );
 
 			// Already alive in DB → пропускаємо
 			if ( $this->maps->exists( (int) $feed->id, $link ) ) {
 				continue;
 			}
 
-			if ( ! self::shouldIncludeByRecency( $wasDeleted, $ts, $cutOff ) ) {
+			if ( ! self::should_include_by_recency( $was_deleted, $ts, $cut_off ) ) {
 				continue;
 			}
 
@@ -680,7 +681,7 @@ PROMPT;
 	private function discover_from_index(
 		\SimpleXMLElement $idx,
 		Feed $feed,
-		int $cutOff
+		int $cut_off
 	): array {
 		$ns    = $idx->getNamespaces( true )[''] ?? '';
 		$nodes = $ns ? $idx->children( $ns )->sitemap : $idx->sitemap;
@@ -693,11 +694,11 @@ PROMPT;
 		$out = array();
 		foreach ( $submaps as $url ) {
 			try {
-				$xml = new \SimpleXMLElement( $this->fetchRss( $url ) );
+				$xml = new \SimpleXMLElement( $this->fetch_rss( $url ) );
 				if ( $xml->getName() === 'urlset' ) {
 					$out = array_merge(
 						$out,
-						$this->discover_from_urlset( $xml, $feed, $cutOff )
+						$this->discover_from_urlset( $xml, $feed, $cut_off )
 					);
 				}
 			} catch ( \Throwable $e ) {
@@ -720,7 +721,7 @@ PROMPT;
 	private function discover_from_rss(
 		\SimpleXMLElement $rss,
 		Feed $feed,
-		int $cutOff
+		int $cut_off
 	): array {
 		$months = array(
 			'Січ' => 'Jan',
@@ -754,21 +755,22 @@ PROMPT;
 			$fixed = preg_replace_callback(
 				'/\s([А-Яа-яІіЇїЄєA-Za-z]{3})\s/u',
 				static fn( $m ) => ' ' . ( $months[ $m[1] ] ?? $m[1] ) . ' ',
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- RSS/Atom XML tag name (<pubDate>), not ours to rename.
 				(string) $item->pubDate,
 				1
 			);
-			$ts    = strtotime( $fixed ) ?: 0;
+			$ts = strtotime( $fixed ) ?: 0;
 
 			$link = UrlCanonicalizer::normalize( (string) $item->link );
 
-			$wasDeleted = $this->maps->isDeleted( (int) $feed->id, $link );
+			$was_deleted = $this->maps->is_deleted( (int) $feed->id, $link );
 
 			// Already alive in DB → пропускаємо
 			if ( $this->maps->exists( (int) $feed->id, $link ) ) {
 				continue;
 			}
 
-			if ( ! self::shouldIncludeByRecency( $wasDeleted, $ts, $cutOff ) ) {
+			if ( ! self::should_include_by_recency( $was_deleted, $ts, $cut_off ) ) {
 				continue;
 			}
 
@@ -800,7 +802,7 @@ PROMPT;
 
 
 	/* ---------- unknown root helper ---------- */
-	private function logUnknownRoot( string $tag, Feed $feed ): array {
+	private function log_unknown_root( string $tag, Feed $feed ): array {
 		$this->log->warning(
 			"⛔️ Unknown XML root <{$tag}>: {$feed->url}",
 			array( 'feed_id' => $feed->id )
@@ -809,8 +811,8 @@ PROMPT;
 		return array();
 	}
 
-	/* ---------- fetchRss + helpers ---------- */
-	private function fetchRss( string $url ): string {
+	/* ---------- fetch_rss + helpers ---------- */
+	private function fetch_rss( string $url ): string {
 		$ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
 				. 'AppleWebKit/537.36 (KHTML, like Gecko) '
 				. 'Chrome/124.0 Safari/537.36';
@@ -837,16 +839,16 @@ PROMPT;
 
 		/* Third-party fallback proxy — opt-in only, see Settings > "Резервний проксі". */
 		if ( in_array( $code, array( 403, 503 ), true ) && ! empty( $settings['enable_fallback_proxy'] ) ) {
-			$proxyUrl = 'https://r.jina.ai/' . $url;
-			$proxyRes = $this->http->get(
-				$proxyUrl,
+			$proxy_url = 'https://r.jina.ai/' . $url;
+			$proxy_res = $this->http->get(
+				$proxy_url,
 				array(
 					'timeout'     => 15,
 					'http_errors' => false,
 				)
 			);
-			if ( $proxyRes->getStatusCode() === 200 ) {
-				return (string) $proxyRes->getBody();
+			if ( $proxy_res->getStatusCode() === 200 ) {
+				return (string) $proxy_res->getBody();
 			}
 		}
 

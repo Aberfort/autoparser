@@ -68,7 +68,7 @@ class ServiceProvider implements ServiceProviderInterface {
 			$opts = get_option( 'autoparser_settings', array() );
 
 			return new \AutoParser\Modules\Predictions\FixturesService(
-				apiKey: $opts['fixtures_api_key'] ?? '',
+				api_key: $opts['fixtures_api_key'] ?? '',
 				http: $c['http'],
 				log: $c['logger'],
 			);

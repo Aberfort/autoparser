@@ -24,8 +24,8 @@ class PostMapRepository {
 	 * TRUE  → post is alive (any status except ‘trash’) – skip import
 	 * FALSE → post missing OR in Trash OR mapping not found
 	 */
-	public function exists( int|string $feedId, string $url ): bool {
-		$post         = $this->getMappedPost( $feedId, $url );
+	public function exists( int|string $feed_id, string $url ): bool {
+		$post         = $this->get_mapped_post( $feed_id, $url );
 		$is_duplicate = $post && $post->post_status !== 'trash';
 
 		/**
@@ -33,29 +33,29 @@ class PostMapRepository {
 		 *
 		 * @param bool        $is_duplicate
 		 * @param string      $url
-		 * @param int|string  $feedId
+		 * @param int|string  $feed_id
 		 */
-		return (bool) apply_filters( 'autoparser_is_duplicate', $is_duplicate, $url, $feedId );
+		return (bool) apply_filters( 'autoparser_is_duplicate', $is_duplicate, $url, $feed_id );
 	}
 
 	/**
 	 * TRUE  → mapping exists but post missing / trashed → may re-import
 	 * FALSE → otherwise
 	 */
-	public function isDeleted( int|string $feedId, string $url ): bool {
-		$post = $this->getMappedPost( $feedId, $url );
+	public function is_deleted( int|string $feed_id, string $url ): bool {
+		$post = $this->get_mapped_post( $feed_id, $url );
 
 		return ! $post || $post->post_status === 'trash';
 	}
 
 	/** Upsert mapping */
-	public function add( int|string $feedId, string $url, int $postId ): void {
+	public function add( int|string $feed_id, string $url, int $post_id ): void {
 		$this->db->replace(
 			$this->table,
 			array(
-				'feed_id'    => (int) $feedId,
+				'feed_id'    => (int) $feed_id,
 				'source_url' => UrlCanonicalizer::normalize( $url ),
-				'post_id'    => $postId,
+				'post_id'    => $post_id,
 			),
 			array( '%d', '%s', '%d' )
 		);
@@ -63,17 +63,17 @@ class PostMapRepository {
 
 	/* ---------- Internals ---------- */
 
-	private function getMappedPost( int|string $feedId, string $url ): ?WP_Post {
-		$postId = $this->db->get_var(
+	private function get_mapped_post( int|string $feed_id, string $url ): ?WP_Post {
+		$post_id = $this->db->get_var(
 			$this->db->prepare(
 				"SELECT post_id FROM {$this->table}
 				 WHERE feed_id = %d AND source_url = %s LIMIT 1",
-				(int) $feedId,
+				(int) $feed_id,
 				UrlCanonicalizer::normalize( $url )
 			)
 		);
 
-		return $postId ? get_post( (int) $postId ) : null;
+		return $post_id ? get_post( (int) $post_id ) : null;
 	}
 
 	/**

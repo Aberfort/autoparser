@@ -18,8 +18,8 @@ class ForecastPublisher {
 		string $team1,
 		string $team2,
 		string $datetime,   // «12.05.2025 21:00»
-		string $forecastHtml,
-		string $rawLine     // рядок із 1-го промпту
+		string $forecast_html,
+		string $raw_line     // рядок із 1-го промпту
 	): int {
 		$ts   = strtotime( $datetime );
 		$date = $ts
@@ -36,9 +36,9 @@ class ForecastPublisher {
 		);
 
 		$h1   = sprintf( 'Прогноз на матч %s – %s', $team1, $team2 );
-		$html = '<h1>' . esc_html( $h1 ) . "</h1>\n" . $forecastHtml;
+		$html = '<h1>' . esc_html( $h1 ) . "</h1>\n" . $forecast_html;
 
-		$postId = $this->insert( $feed, $title, $html );
+		$post_id = $this->insert( $feed, $title, $html );
 
 		/* ───── Yoast SEO для прогнозів ───── */
 		$tokens = array(
@@ -47,29 +47,29 @@ class ForecastPublisher {
 			'{{date}}'     => $date,
 			'{{sitename}}' => $site,
 			'{{title}}'    => $title,
-			'{{excerpt}}'  => $rawLine,
+			'{{excerpt}}'  => $raw_line,
 		);
 
 		// якщо адміністратор нічого не вказав — використовуємо дефолт
-		$metaTitleTpl = $feed->meta_title ?: '{{team1}} - {{team2}} ⇒ прогноз на матч на {{date}} от {{sitename}}';
-		$metaDescTpl  = $feed->meta_description ?: 'Прогноз и анонс матча {{team1}} - {{team2}} {{date}} ⚡️ Лучшие прогнозы, анонсы футбольных матчей от {{sitename}}';
+		$meta_title_tpl = $feed->meta_title ?: '{{team1}} - {{team2}} ⇒ прогноз на матч на {{date}} от {{sitename}}';
+		$meta_desc_tpl  = $feed->meta_description ?: 'Прогноз и анонс матча {{team1}} - {{team2}} {{date}} ⚡️ Лучшие прогнозы, анонсы футбольных матчей от {{sitename}}';
 
 		update_post_meta(
-			$postId,
+			$post_id,
 			'_yoast_wpseo_title',
-			strtr( $metaTitleTpl, $tokens )
+			strtr( $meta_title_tpl, $tokens )
 		);
 		update_post_meta(
-			$postId,
+			$post_id,
 			'_yoast_wpseo_metadesc',
-			strtr( $metaDescTpl, $tokens )
+			strtr( $meta_desc_tpl, $tokens )
 		);
 
-		return $postId;
+		return $post_id;
 	}
 
 	private function insert( Feed $feed, string $title, string $html ): int {
-		$postArgs = array(
+		$post_args = array(
 			'post_title'   => wp_strip_all_tags( $title ),
 			'post_status'  => $feed->status,
 			'post_type'    => $feed->post_type,
@@ -79,11 +79,11 @@ class ForecastPublisher {
 		);
 
 		/** @see \AutoParser\Publisher\GutenbergPublisher::insert() for the filter doc. */
-		$postArgs = apply_filters( 'autoparser_post_args', $postArgs, $feed, $title, $html );
-		$postId   = wp_insert_post( $postArgs );
+		$post_args = apply_filters( 'autoparser_post_args', $post_args, $feed, $title, $html );
+		$post_id   = wp_insert_post( $post_args );
 
 		if ( function_exists( 'add_row' ) ) {
-			$sectionRow = array(
+			$section_row = array(
 				'acf_fc_layout' => 'section',
 				'widgets'       => array(
 					array(
@@ -110,12 +110,12 @@ class ForecastPublisher {
 					),
 				),
 			);
-			add_row( 'content_builder', $sectionRow, $postId );
+			add_row( 'content_builder', $section_row, $post_id );
 		}
 
 		/** @see \AutoParser\Publisher\GutenbergPublisher::insert() for the action doc. */
-		do_action( 'autoparser_post_published', $postId, $feed );
+		do_action( 'autoparser_post_published', $post_id, $feed );
 
-		return $postId;
+		return $post_id;
 	}
 }

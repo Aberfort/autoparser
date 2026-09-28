@@ -60,7 +60,7 @@ class FeedRunController extends WP_REST_Controller {
 	 */
 	public function preview( $req ) {
 		try {
-			$result = $this->parser->previewExtract(
+			$result = $this->parser->preview_extract(
 				(string) $req->get_param( 'url' ),
 				(string) $req->get_param( 'selector' ),
 				$req->get_param( 'selector_end' ) ?: null

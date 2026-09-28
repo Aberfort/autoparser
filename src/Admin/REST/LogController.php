@@ -10,10 +10,10 @@ use WP_Error;
  */
 class LogController extends WP_REST_Controller {
 
-	private string $logDir;
+	private string $log_dir;
 
-	public function __construct( string $logDir ) {
-		$this->logDir    = $logDir;
+	public function __construct( string $log_dir ) {
+		$this->log_dir   = $log_dir;
 		$this->namespace = 'autoparser/v1';
 		$this->rest_base = 'logs';
 	}
@@ -38,7 +38,7 @@ class LogController extends WP_REST_Controller {
 		$date  = sanitize_file_name( $request->get_param( 'date' ) ?? gmdate( 'Y-m-d' ) );
 		$limit = (int) ( $request->get_param( 'limit' ) ?? 500 );
 
-		$file = "{$this->logDir}/autoparser-{$date}.log";
+		$file = "{$this->log_dir}/autoparser-{$date}.log";
 		if ( ! file_exists( $file ) ) {
 			return new WP_Error( 'autoparser_no_log', 'Log file not found', array( 'status' => 404 ) );
 		}

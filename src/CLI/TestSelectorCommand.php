@@ -51,7 +51,7 @@ class TestSelectorCommand {
 		}
 
 		try {
-			$result = $this->parser->previewExtract( $url, $selector, $selector_end );
+			$result = $this->parser->preview_extract( $url, $selector, $selector_end );
 		} catch ( \Throwable $e ) {
 			WP_CLI::error( $e->getMessage() );
 

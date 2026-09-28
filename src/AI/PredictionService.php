@@ -11,7 +11,7 @@ class PredictionService {
 	) {
 	}
 
-	public function getForecast( string $prompt, array $vars = array() ): string {
+	public function get_forecast( string $prompt, array $vars = array() ): string {
 		$filled = strtr( $prompt, $vars );
 
 		return $this->provider->forecast( $filled, $vars );

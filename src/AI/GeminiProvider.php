@@ -11,7 +11,7 @@ use RuntimeException;
 class GeminiProvider implements ProviderInterface {
 
 	public function __construct(
-		private string $apiKey,
+		private string $api_key,
 		private Logger $log,
 		private string $model = 'gemini-2.0-flash'
 	) {
@@ -22,7 +22,7 @@ class GeminiProvider implements ProviderInterface {
 		$length = mb_strlen( $text );
 		$this->log->info( "Gemini rewrite input: {$length} chars" );
 
-		$client = ( new Client( $this->apiKey ) )->withV1BetaVersion();
+		$client = ( new Client( $this->api_key ) )->withV1BetaVersion();
 		$resp   = $client->generativeModel( $this->model )
 						->generateContent( new TextPart( trim( $prompt . "\n\n" . $text ) ) );
 
@@ -38,7 +38,7 @@ class GeminiProvider implements ProviderInterface {
 	public function forecast( string $prompt, array $extra = array() ): string {
 		$this->log->info( '[Gemini] forecast-prompt (' . mb_strlen( $prompt ) . ' chars)' );
 
-		$client = ( new Client( $this->apiKey ) )->withV1BetaVersion();
+		$client = ( new Client( $this->api_key ) )->withV1BetaVersion();
 		$resp   = $client->generativeModel( $this->model )
 						->generateContent( new TextPart( $prompt ) );
 

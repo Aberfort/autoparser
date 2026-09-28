@@ -11,7 +11,7 @@ class GutenbergPublisher {
 
 	/** Публікує «звичайний» (RSS) пост */
 	public function publish( Feed $feed, string $title, string $content ): int {
-		$postId = $this->insert( $feed, $title, $content );
+		$post_id = $this->insert( $feed, $title, $content );
 
 		/** ───── Yoast SEO (якщо адміністратор заповнив шаблони) ───── */
 		if ( $feed->meta_title || $feed->meta_description ) {
@@ -26,7 +26,7 @@ class GutenbergPublisher {
 
 			if ( $feed->meta_title ) {
 				update_post_meta(
-					$postId,
+					$post_id,
 					'_yoast_wpseo_title',
 					strtr( $feed->meta_title, $tokens )
 				);
@@ -34,18 +34,18 @@ class GutenbergPublisher {
 
 			if ( $feed->meta_description ) {
 				update_post_meta(
-					$postId,
+					$post_id,
 					'_yoast_wpseo_metadesc',
 					strtr( $feed->meta_description, $tokens )
 				);
 			}
 		}
 
-		return $postId;
+		return $post_id;
 	}
 
 	private function insert( Feed $feed, string $title, string $html ): int {
-		$postArgs = array(
+		$post_args = array(
 			'post_title'  => wp_strip_all_tags( $title ),
 			'post_status' => $feed->status,
 			'post_type'   => $feed->post_type,
@@ -65,27 +65,27 @@ class GutenbergPublisher {
 			);
 		}
 
-		$postArgs['post_content'] = serialize_blocks( $blocks );
+		$post_args['post_content'] = serialize_blocks( $blocks );
 
 		/**
 		 * Filters the wp_insert_post() args before a feed-generated post is inserted.
 		 *
-		 * @param array  $postArgs
+		 * @param array  $post_args
 		 * @param Feed   $feed
 		 * @param string $title
 		 * @param string $html Rewritten content before block-serialization.
 		 */
-		$postArgs = apply_filters( 'autoparser_post_args', $postArgs, $feed, $title, $html );
-		$postId   = wp_insert_post( $postArgs );
+		$post_args = apply_filters( 'autoparser_post_args', $post_args, $feed, $title, $html );
+		$post_id   = wp_insert_post( $post_args );
 
 		/**
 		 * Fires after a feed-generated post has been inserted.
 		 *
-		 * @param int  $postId
+		 * @param int  $post_id
 		 * @param Feed $feed
 		 */
-		do_action( 'autoparser_post_published', $postId, $feed );
+		do_action( 'autoparser_post_published', $post_id, $feed );
 
-		return $postId;
+		return $post_id;
 	}
 }

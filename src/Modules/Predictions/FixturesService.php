@@ -51,7 +51,7 @@ class FixturesService {
 	);
 
 	public function __construct(
-		private string $apiKey,
+		private string $api_key,
 		private Client $http,
 		private Logger $log,
 	) {
@@ -60,43 +60,43 @@ class FixturesService {
 	/**
 	 * @return array<array{team1:string,team2:string,datetime:string,league:string}>
 	 */
-	public function todayTop( int $limit = 5 ): array {
+	public function today_top( int $limit = 5 ): array {
 
-		$tzSite   = wp_timezone();                 // WP тайм-зона (DateTimeZone)
-		$todayLoc = ( new \DateTimeImmutable( 'now', $tzSite ) )->format( 'Y-m-d' ); // «2025-05-20»
-		$todayUtc = ( new \DateTimeImmutable( 'now', new \DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d' );
+		$tz_site   = wp_timezone();                 // WP тайм-зона (DateTimeZone)
+		$today_loc = ( new \DateTimeImmutable( 'now', $tz_site ) )->format( 'Y-m-d' ); // «2025-05-20»
+		$today_utc = ( new \DateTimeImmutable( 'now', new \DateTimeZone( 'UTC' ) ) )->format( 'Y-m-d' );
 
-		$this->log->info( "[Fixtures] Fetch $todayUtc (UTC) → відфільтровуємо $todayLoc ($tzSite->getName())" );
+		$this->log->info( "[Fixtures] Fetch $today_utc (UTC) → відфільтровуємо $today_loc ($tz_site->getName())" );
 
 		/* ①  HTTP-запит */
-		$response = $this->get( '/fixtures', array( 'date' => $todayUtc ) );
+		$response = $this->get( '/fixtures', array( 'date' => $today_utc ) );
 
 		$rows = array();
 		foreach ( $response as $fx ) {
 
-			$leagueId   = (int) ( $fx['league']['id'] ?? 0 );
-			$leagueName = $fx['league']['name'] ?? '';
+			$league_id   = (int) ( $fx['league']['id'] ?? 0 );
+			$league_name = $fx['league']['name'] ?? '';
 
 			/* тільки whitelisted ліги */
-			if ( ! isset( self::TOP_LEAGUES[ $leagueId ] ) ) {
+			if ( ! isset( self::TOP_LEAGUES[ $league_id ] ) ) {
 				continue;
 			}
 
-			$utcIso = $fx['fixture']['date'] ?? '';          // 2025-05-20T19:00:00+00:00
-			$dtLoc  = ( new \DateTimeImmutable( $utcIso ) )->setTimezone( $tzSite );
+			$utc_iso = $fx['fixture']['date'] ?? '';          // 2025-05-20T19:00:00+00:00
+			$dt_loc  = ( new \DateTimeImmutable( $utc_iso ) )->setTimezone( $tz_site );
 
 			/* відкидаємо, якщо після конвертації це вже не «сьогодні» */
-			if ( $dtLoc->format( 'Y-m-d' ) !== $todayLoc ) {
+			if ( $dt_loc->format( 'Y-m-d' ) !== $today_loc ) {
 				continue;
 			}
 
 			$rows[] = array(
 				'team1'    => $fx['teams']['home']['name'] ?? '',
 				'team2'    => $fx['teams']['away']['name'] ?? '',
-				'datetime' => $dtLoc->format( 'd.m.Y H:i' ),
+				'datetime' => $dt_loc->format( 'd.m.Y H:i' ),
 				// 20.05.2025 22:00
-				'league'   => $leagueName,
-				'__prio'   => self::TOP_LEAGUES[ $leagueId ],
+				'league'   => $league_name,
+				'__prio'   => self::TOP_LEAGUES[ $league_id ],
 			);
 		}
 
@@ -132,7 +132,7 @@ class FixturesService {
 				$url,
 				array(
 					'headers' => array(
-						'x-apisports-key' => $this->apiKey,
+						'x-apisports-key' => $this->api_key,
 						'Accept'          => 'application/json',
 					),
 					'timeout' => 15,
