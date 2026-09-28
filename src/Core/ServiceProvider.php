@@ -20,6 +20,7 @@ use AutoParser\Admin\REST\ScheduleController;
 use AutoParser\Admin\REST\SettingsController;
 use AutoParser\Parser\ParserService;
 use AutoParser\Publisher\GutenbergPublisher;
+use AutoParser\Modules\Predictions\ForecastPublisher;
 use AutoParser\Cron\Scheduler;
 use AutoParser\CLI\RunCommand;
 use AutoParser\CLI\TestSelectorCommand;
@@ -76,6 +77,9 @@ class ServiceProvider implements ServiceProviderInterface {
 		/* ───────── Publisher ───────── */
 		$c['publisher'] = static fn() => new GutenbergPublisher();
 
+		/* ───────── Forecast Publisher (predictions module) ───────── */
+		$c['forecast.publisher'] = static fn() => new ForecastPublisher();
+
 		/* ───────── Usage tracking (per-provider call counters) ───────── */
 		$c['usage.tracker'] = static fn() => new UsageTracker();
 
@@ -86,6 +90,7 @@ class ServiceProvider implements ServiceProviderInterface {
 				$c['feed.post_map'],
 				$c['fixtures'],
 				$c['publisher'],
+				$c['forecast.publisher'],
 				$c['http'],
 				$c['logger'],
 				$c['usage.tracker'],

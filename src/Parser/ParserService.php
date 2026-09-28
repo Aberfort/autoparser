@@ -16,6 +16,7 @@ use AutoParser\Feed\FeedRepository;
 use AutoParser\Feed\PostMapRepository;
 use AutoParser\Publisher\GutenbergPublisher;
 use AutoParser\Modules\Predictions\FixturesService;
+use AutoParser\Modules\Predictions\ForecastPublisher;
 use AutoParser\AI\ProviderFactory;
 use AutoParser\AI\RewriteService as DynamicRewrite;
 use AutoParser\AI\PredictionService as DynamicPredict;
@@ -50,6 +51,7 @@ PROMPT;
 		private PostMapRepository $maps,
 		private FixturesService $fixtures,
 		private GutenbergPublisher $publisher,
+		private ForecastPublisher $forecastPublisher,
 		private Client $http,
 		private Logger $log,
 		private UsageTracker $usage,
@@ -252,7 +254,7 @@ PROMPT;
 				continue;
 			}
 
-			$post_id = $this->publisher->publishForecast(
+			$post_id = $this->forecastPublisher->publish(
 				$feed,
 				$team1,
 				$team2,
@@ -411,7 +413,7 @@ PROMPT;
 						$teams
 					);
 
-					$post_id = $this->publisher->publishForecast(
+					$post_id = $this->forecastPublisher->publish(
 						$feed,
 						$team1,
 						$team2,
