@@ -569,6 +569,29 @@ PROMPT;
 		);
 	}
 
+	/**
+	 * Whether a discovered item is recent enough to import, given whether
+	 * its previously-imported post was since deleted. Pure/static and
+	 * shared by discover_from_urlset() and discover_from_rss() (it used
+	 * to be copy-pasted in both) so it can be unit-tested without a
+	 * database or WordPress runtime — see tests/Unit/ParserServiceTest.php.
+	 *
+	 * @param bool $wasDeleted TRUE if a mapping exists but the post is gone/trashed.
+	 * @param int  $ts         Item's timestamp, or 0 if it has none.
+	 * @param int  $cutOff     Feed's last-seen timestamp ($feed->last_ts), or 0 on first import.
+	 */
+	public static function shouldIncludeByRecency( bool $wasDeleted, int $ts, int $cutOff ): bool {
+		if ( $wasDeleted ) {
+			return true;
+		}
+
+		if ( $ts > 0 && $ts > $cutOff ) {
+			return true;
+		}
+
+		return 0 === $ts && 0 === $cutOff;
+	}
+
 	/*
 	=======================================================================
 	 *  URL-discoverer  (RSS + XML-sitemap + sitemapindex)
@@ -621,22 +644,12 @@ PROMPT;
 
 			$wasDeleted = $this->maps->isDeleted( (int) $feed->id, $link );
 
-			// 1) Already alive in DB → пропускаємо
+			// Already alive in DB → пропускаємо
 			if ( $this->maps->exists( (int) $feed->id, $link ) ) {
 				continue;
 			}
 
-			// 2) Видалений раніше пост → завжди беремо, дата неважлива
-			if ( $wasDeleted ) {
-				/* include */
-			} // 3) Новіший за cut-off → беремо
-			elseif ( $ts > 0 && $ts > $cutOff ) {
-				/* include */
-			} // 4) Без дати, але це перший імпорт (cutOff == 0) → беремо
-			elseif ( $ts == 0 && $cutOff == 0 ) {
-				/* include */
-			} // Інакше — занадто старе, пропускаємо
-			else {
+			if ( ! self::shouldIncludeByRecency( $wasDeleted, $ts, $cutOff ) ) {
 				continue;
 			}
 
@@ -746,25 +759,14 @@ PROMPT;
 
 			$link = UrlCanonicalizer::normalize( (string) $item->link );
 
-			// ----------- FINAL include/skip logic -----------
 			$wasDeleted = $this->maps->isDeleted( (int) $feed->id, $link );
 
-			// 1) Already alive in DB → пропускаємо
+			// Already alive in DB → пропускаємо
 			if ( $this->maps->exists( (int) $feed->id, $link ) ) {
 				continue;
 			}
 
-			// 2) Видалений раніше пост → завжди беремо, дата неважлива
-			if ( $wasDeleted ) {
-				/* include */
-			} // 3) Новіший за cut-off → беремо
-			elseif ( $ts > 0 && $ts > $cutOff ) {
-				/* include */
-			} // 4) Без дати, але це перший імпорт (cutOff == 0) → беремо
-			elseif ( $ts == 0 && $cutOff == 0 ) {
-				/* include */
-			} // Інакше — занадто старе, пропускаємо
-			else {
+			if ( ! self::shouldIncludeByRecency( $wasDeleted, $ts, $cutOff ) ) {
 				continue;
 			}
 

@@ -8,6 +8,9 @@
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 	<exclude-pattern>/assets/build/*</exclude-pattern>
 	<exclude-pattern>/assets/src/*</exclude-pattern>
+	<!-- PHPUnit tests follow PSR/PHPUnit conventions (camelCase test
+	     methods, no WP runtime), not WordPress Coding Standards. -->
+	<exclude-pattern>/tests/*</exclude-pattern>
 
 	<arg value="sp"/>
 	<arg name="basepath" value="."/>
